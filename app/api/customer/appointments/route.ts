@@ -12,6 +12,15 @@ export async function GET(request: NextRequest) {
       where: {
         userId,
       },
+      include: {
+        serviceCenter: {
+          select: {
+            name: true,
+            city: true,
+            phoneNumber: true,
+          },
+        },
+      },
     });
     return NextResponse.json({
       message: "Success",

@@ -23,6 +23,8 @@ export default async function CustomerLayout({ children }: { children: React.Rea
         },
         {
             label: "Find Center", href: "/customer/appointments/new/centers-by-city", icon: "search"
+        }, {
+            label: "Invoices", href: "/customer/invoices", icon: "receipt"
         }
     ]
     return (
@@ -32,14 +34,13 @@ export default async function CustomerLayout({ children }: { children: React.Rea
                 <Sidebar
                     userId={session.user.id!}
                     userName={session.user.name!}
-                    routeName='User'
                     linkList={links}
                 />
 
                 {/* Main content area with trigger */}
-                <SidebarInset className=" bg-neutral-50 dark:bg-neutral-900">
+                <SidebarInset className=" bg-neutral-50 dark:bg-neutral-950">
                     {/* Trigger should be visible at the top-left of content */}
-                    <header className="py-2 pl-3  pr-6 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-3 justify-between">
+                    <header className="py-2 pl-3  pr-6 border-b border-neutral-200 dark:border-neutral-800 dark:bg-neutral-800 bg-neutral-100 flex items-center gap-3 justify-between">
                         <div className="flex flew-row items-center gap-2">
                             <SidebarTrigger />
                             <h1 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">

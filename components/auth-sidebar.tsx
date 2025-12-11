@@ -27,13 +27,12 @@ import { iconMap, linksType } from "@/types/common";
 interface SidebarProps {
   userId: string;
   userName: string;
-  routeName: string
   linkList: linksType[]
 }
 
 
 
-export default function Sidebar({ userId, userName, routeName, linkList }: SidebarProps) {
+export default function Sidebar({ userId, userName, linkList }: SidebarProps) {
 
   const pathname = usePathname();
 
@@ -41,11 +40,11 @@ export default function Sidebar({ userId, userName, routeName, linkList }: Sideb
     <ShadCNSidebar
       variant="floating"
       collapsible="offcanvas"
-      className="min-h-dvh  shadow-lg  p-0 "
+      className="min-h-dvh  shadow-lg  p-0 rounded-none "
     >
-      <SidebarHeader className="border-b border-neutral-200 dark:border-neutral-700 px-4 py-3 ">
+      <SidebarHeader className="border-b border-neutral-200 dark:border-neutral-700 dark:bg-neutral-900/60 px-4 py-3 ">
         <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-          {routeName}
+          AutoMatrix
         </h2>
       </SidebarHeader>
       <SidebarContent className=" overflow-y-auto max-h-full dark:bg-neutral-900 ">

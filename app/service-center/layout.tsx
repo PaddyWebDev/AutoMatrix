@@ -22,6 +22,7 @@ export default async function ServiceCenterLayout({ children }: { children: Reac
             label: "Inventory", href: "/service-center/inventory", icon: "boxes"
         }
     ]
+
     return (
         <main className="flex h-dvh w-dvw   dark:bg-neutral-950">
             <SessionProvider session={session}>
@@ -29,7 +30,6 @@ export default async function ServiceCenterLayout({ children }: { children: Reac
                 <Sidebar
                     userId={session.user.id!}
                     userName={session.user.name!}
-                    routeName='Service Center'
                     linkList={links}
                 />
 

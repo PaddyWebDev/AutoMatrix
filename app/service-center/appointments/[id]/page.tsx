@@ -20,6 +20,7 @@ import React from "react";
 import queryClient from "@/lib/tanstack-query";
 import { AppointmentServiceCenter } from "@/types/service-center";
 import { bookingStatus } from "@prisma/client";
+import GenerateInvoice from "@/components/service-center/generate-invoice";
 
 
 export default function AppointmentDetailPage() {
@@ -168,6 +169,7 @@ export default function AppointmentDetailPage() {
         <CardContent className="flex flex-col ">
           <div className="mb-4">
             <NewJobCard appointmentId={id as string} disabledStatus={appointment.status === "COMPLETED"} />
+            <GenerateInvoice appointmentId={id as string} totalAmount={totalCost} />
           </div>
           <div className="">
 

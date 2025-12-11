@@ -6,6 +6,7 @@ import {
   Home,
   LocateFixedIcon,
   LucideIcon,
+  Receipt,
   Search,
   Settings,
   User,
@@ -32,4 +33,5 @@ export const iconMap = new Map<string, LucideIcon>([
   ["search", Search],
   ["calendarDays", CalendarDays],
   ["boxes", Boxes],
+  ["receipt", Receipt]
 ]);

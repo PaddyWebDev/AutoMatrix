@@ -7,8 +7,9 @@ import { useAppointments, useVehicles } from "@/hooks/customer";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import AddVehiclePage from "@/components/customer/new-vehicle-form";
-import { Appointment, Vehicle } from "@prisma/client";
+import {  Vehicle } from "@prisma/client";
 import { format } from "date-fns";
+import { customerAppointment } from "@/types/customer";
 
 
 export default function CustomerDashboard() {
@@ -35,12 +36,12 @@ export default function CustomerDashboard() {
       <h1 className="text-3xl font-bold">Customer Dashboard</h1>
 
       {/* Profile Section */}
-      <Card>
+      <Card className="dark:bg-neutral-800 bg-neutral-100">
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle className="text-3xl font-bold">Profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 dark:bg-neutral-950 bg-neutral-50 shadow-md p-5 rounded-md">
             <Avatar className="h-20 w-20">
               <AvatarImage src={"/placeholder-user.jpg"} />
               <AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
@@ -54,10 +55,10 @@ export default function CustomerDashboard() {
       </Card>
 
       {/* Vehicles Section */}
-      <Card>
+      <Card className="dark:bg-neutral-800 bg-neutral-100">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>My Vehicles</span>
+            <h1 className="text-3xl font-bold">My Vehicles</h1>
             <AddVehiclePage />
           </CardTitle>
         </CardHeader>
@@ -65,13 +66,20 @@ export default function CustomerDashboard() {
           {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 dark:bg-neutral-950 bg-neutral-50 shadow-md rounded-md p-5">
               {vehicles.map((vehicle: Vehicle) => (
-                <Card key={vehicle.id}>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold">{vehicle.vehicleName}</h3>
-                    <p>{vehicle.vehicleMake} {vehicle.vehicleModel}</p>
-                    <p>Type: {vehicle.vehicleType}</p>
+                <Card key={vehicle.id} className="w-[300px]">
+                  <CardHeader className="-mb-4">
+                    <CardTitle className="text-xl font-bold text-center">
+                      {vehicle.vehicleName}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className=" px-4 flex items-center justify-center">
+                    <div>
+                      <p><strong>Company:</strong> {vehicle.vehicleMake} <strong>Model: </strong> {vehicle.vehicleModel}</p>
+                      <p><strong>Type:</strong> {vehicle.vehicleType}</p>
+                      <p><strong>Number Plate:</strong> {vehicle.numberPlate}</p>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -81,16 +89,33 @@ export default function CustomerDashboard() {
       </Card>
 
       {/* Appointments Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>My Appointments</CardTitle>
+      <Card className="dark:bg-neutral-800 bg-neutral-100">
+        <CardHeader className="">
+          <CardTitle className="text-3xl font-bold">My Appointments</CardTitle>
         </CardHeader>
-        <CardContent>
-          {appointments.map((appointment: Appointment) => (
-            <Card key={appointment.id}>
-              <CardContent className="p-4">
-                <h3 className="font-semibold">{appointment.serviceType}</h3>
-                {format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}
+        <CardContent className="dark:bg-neutral-950 bg-neutral-50 p-5 rounded-md mx-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {appointments.map((appointment: customerAppointment) => (
+            <Card key={appointment.id} className="">
+              <CardHeader className="-mb-10">
+                <CardTitle className="text-2xl font-bold text-center">
+                  {appointment.serviceType}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 flex flex-col items-center mt-0">
+                <div>
+                  <p>
+                    <strong>Service Center:</strong> {appointment.serviceCenter.name}
+                  </p>
+                  <p>
+                    <strong>Service Center City:</strong> {appointment.serviceCenter.city}
+                  </p>
+                  <p>
+                    <strong>Service Center Phone Number:</strong> {appointment.serviceCenter.phoneNumber}
+                  </p>
+                  <p>
+                    <strong>Requested Date: </strong>{format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}
+                  </p>
+                </div>
               </CardContent>
             </Card>
           ))}

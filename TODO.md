@@ -1,14 +1,18 @@
-# TODO: Implement Paginated Appointments Page
+# Invoice Modal Design and PDF Download Task
 
-## Steps:
-1. **Implement API Route for Appointments List with Pagination**
-   - Edit `app/api/service-centers/appointments/route.ts` to add GET handler with pagination (limit 20, page param), fetch from Prisma with serviceCenterId filter, return appointments, totalCount, etc.
+## Steps to Complete
 
-2. **Add POST Handler for Creating Appointments (if needed)**
-   - In the same route.ts, add POST handler using RHF/Zod for validation, create appointment in Prisma, return success.
-
-3. **Update Appointments Page Component**
-   - Replace `app/service-center/appointments/page.tsx` with full component: useQuery for fetching, Shadcn Table for rendering, pagination controls, Dialog with Form for creating new appointments.
-
-4. **Test and Verify**
-   - Run dev server, navigate to page, check data loading, pagination, form submission, responsiveness.
+1. **Install jsPDF library** for PDF generation functionality.
+2. **Create Invoice Modal Component** (`components/customer/invoice-modal.tsx`):
+   - Design modal using shadcn components (Dialog, Card, etc.).
+   - Display bill details: parts used, quantities, labor charges, total cost (replicate calculation logic from service center appointments page).
+   - Include PDF download button.
+3. **Update Customer Invoices Page** (`app/customer/invoices/page.tsx`):
+   - Add modal trigger (e.g., button on each invoice card).
+   - Pass selected invoice data to the modal.
+4. **Implement PDF Download Feature**:
+   - Use jsPDF to generate PDF with invoice details.
+   - Ensure PDF includes all bill details, parts, quantities, labor charges, and total.
+5. **Test the Modal and PDF Download**:
+   - Verify modal displays correctly with data.
+   - Test PDF generation and download functionality.

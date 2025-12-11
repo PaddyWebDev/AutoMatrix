@@ -1,6 +1,4 @@
-import queryClient from "@/lib/tanstack-query";
-import { Vehicle } from "@prisma/client";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -29,8 +27,6 @@ export const useAppointments = (userId?: string) => {
     enabled: !!userId,
   });
 };
-
-
 
 export const useServiceCenters = () => {
   return useQuery({
@@ -84,6 +80,18 @@ export function useServiceCentersFetchAll() {
     queryFn: async () => {
       const response = await axios.get("/api/service-centers");
       return response.data.service_center_data;
+    },
+  });
+}
+
+export function useInvoices(userId: string) {
+  return useQuery({
+    queryKey: ["invoices-user"],
+    queryFn: async function () {
+      const response = await axios.get(
+        `/api/customer/invoices?userId=${userId}`
+      );
+      return response.data.invoice_data;
     },
   });
 }
