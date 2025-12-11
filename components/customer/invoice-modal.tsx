@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator";
 import { Download, Eye } from "lucide-react";
 import { customerInvoice } from "@/types/customer";
 import { format } from "date-fns";
-import jsPDF from "jspdf";
 import { generateInvoicePdf } from "@/hooks/invoice";
 
 interface InvoiceModalProps {

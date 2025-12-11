@@ -6,7 +6,6 @@ import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Invoice } from "@prisma/client";
 import { format } from "date-fns";
 import { useEffect } from "react";
 import socket from "@/lib/socket-io";

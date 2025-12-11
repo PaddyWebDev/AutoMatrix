@@ -26,7 +26,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <Sidebar
                     userId={session.user.id!}
                     userName={session.user.name!}
-                    routeName='Admin'
                     linkList={links}
                 />
 

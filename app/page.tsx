@@ -1,6 +1,6 @@
 import GuestNavbar from "@/components/guest-navbar";
 import Link from "next/link";
-import { Receipt, ClipboardList, Calendar, Wrench, Car, FileText } from "lucide-react";
+import { ClipboardList, FileText } from "lucide-react";
 
 export default function HomePage() {
   return (

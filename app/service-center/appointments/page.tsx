@@ -135,7 +135,6 @@ export default function AppointmentsPage() {
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="PENDING">Pending</SelectItem>
-                                        <SelectItem value="APPROVED">Approved</SelectItem>
                                         <SelectItem value="InService">In Service</SelectItem>
                                         <SelectItem value="COMPLETED">Completed</SelectItem>
                                     </SelectContent>

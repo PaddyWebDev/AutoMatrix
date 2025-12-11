@@ -1,6 +1,42 @@
 import prisma from "@/lib/db";
-import { bookingStatus } from "@prisma/client";
+import { bookingStatus, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+async function dynamicWhereClause(
+  where: Prisma.AppointmentWhereInput,
+  limit: number,
+  skip: number
+) {
+  return await prisma.appointment.findMany({
+    where,
+    orderBy: {
+      requestedDate: "desc",
+    },
+    take: limit,
+    skip,
+    select: {
+      id: true,
+      serviceType: true,
+      status: true,
+      requestedDate: true,
+      actualCompletionDate: true,
+      slaDeadline: true,
+      Vehicle: {
+        select: {
+          vehicleName: true,
+          vehicleMake: true,
+          vehicleModel: true,
+        },
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -19,101 +55,29 @@ export async function GET(request: NextRequest) {
 
     let appointments;
     if (status) {
-      appointments = await prisma.appointment.findMany({
-        where: {
-          status: bookingStatus[status as keyof typeof bookingStatus],
+      appointments = await dynamicWhereClause(
+        {
+          status: status as bookingStatus,
         },
-        orderBy: {
-          requestedDate: "desc",
-        },
-        take: limit,
-        skip,
-        select: {
-          id: true,
-          serviceType: true,
-          status: true,
-          requestedDate: true,
-          actualCompletionDate: true,
-          slaDeadline: true,
-          Vehicle: {
-            select: {
-              vehicleName: true,
-              vehicleMake: true,
-              vehicleModel: true,
-            },
-          },
-          owner: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
+        limit,
+        skip
+      );
     } else if (serviceType) {
-      appointments = await prisma.appointment.findMany({
-        where: {
-          serviceType: serviceType,
+      appointments = await dynamicWhereClause(
+        {
+          serviceType,
         },
-        orderBy: {
-          requestedDate: "desc",
-        },
-        take: limit,
-        skip,
-        select: {
-          id: true,
-          serviceType: true,
-          status: true,
-          requestedDate: true,
-          actualCompletionDate: true,
-          slaDeadline: true,
-          Vehicle: {
-            select: {
-              vehicleName: true,
-              vehicleMake: true,
-              vehicleModel: true,
-            },
-          },
-          owner: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
+        limit,
+        skip
+      );
     } else {
-      appointments = await prisma.appointment.findMany({
-        where: {
-          serviceCenterId: serviceCenterId,
+      appointments = await dynamicWhereClause(
+        {
+          serviceCenterId,
         },
-        orderBy: {
-          requestedDate: "desc",
-        },
-        take: limit,
-        skip,
-        select: {
-          id: true,
-          serviceType: true,
-          status: true,
-          requestedDate: true,
-          actualCompletionDate: true,
-          slaDeadline: true,
-          Vehicle: {
-            select: {
-              vehicleName: true,
-              vehicleMake: true,
-              vehicleModel: true,
-            },
-          },
-          owner: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-      });
+        limit,
+        skip
+      );
     }
 
     const totalPages = Math.ceil(appointments.length / limit);

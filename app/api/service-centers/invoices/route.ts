@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/db";
+import { InvoiceStatus, Prisma } from "@prisma/client";
+
+async function dynamicWhereClause(whereClause: Prisma.InvoiceWhereInput) {
+  const invoices = await prisma.invoice.findMany({
+    where: whereClause,
+    include: {
+      appointment: {
+        include: {
+          Vehicle: true,
+          owner: true,
+        },
+      },
+    },
+    orderBy: {
+      billingDate: "desc",
+    },
+  });
+  return invoices;
+}
 
 export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get("userId");
@@ -13,37 +32,26 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
 
-    const where: Record<string, any> = {
-      appointment: {
-        serviceCenterId: userId,
-      },
-    };
+    let invoices;
 
     if (status) {
-      where.status = status;
-    }
-
-    if (startDate && endDate) {
-      where.billingDate = {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      };
-    }
-
-    const invoices = await prisma.invoice.findMany({
-      where,
-      include: {
-        appointment: {
-          include: {
-            Vehicle: true,
-            owner: true,
-          },
+      invoices = await dynamicWhereClause({
+        status: status as InvoiceStatus,
+      });
+    } else if (startDate && endDate) {
+      invoices = await dynamicWhereClause({
+        billingDate: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
         },
-      },
-      orderBy: {
-        billingDate: "desc",
-      },
-    });
+      });
+    } else {
+      invoices = await dynamicWhereClause({
+        appointment: {
+          serviceCenterId: userId,
+        },
+      });
+    }
 
     return NextResponse.json(invoices);
   } catch (error) {
