@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import NextAuth, { NextAuthRequest } from "next-auth";
 
 import { NextResponse } from "next/server";
