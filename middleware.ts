@@ -5,13 +5,14 @@ import AuthConfig from "./auth.config";
 import { apiAuthPrefix } from "./routes";
 const { auth } = NextAuth(AuthConfig);
 
+
+
+
 export default auth(async (request: NextAuthRequest) => {
   const { nextUrl, auth } = request;
   const loggedIn = !!auth;
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isAdminAuthRoute = nextUrl.pathname.startsWith("/admin");
-  const isCustomerRoute = nextUrl.pathname.startsWith("/customer");
-  const isServiceCenterRoute = nextUrl.pathname.startsWith("/service=center");
 
   if (isApiAuthRoute) {
     return;
