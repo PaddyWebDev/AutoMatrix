@@ -50,15 +50,15 @@ export default function Login() {
 
                     switch (validatedFields.data.role) {
                         case userType.ADMIN.toString(): {
-                            router.push("/admin/dashboard")
+                            router.push("/auth/admin/dashboard")
                             break;
                         }
                         case userType.CUSTOMER.toString(): {
-                            router.push("/customer/dashboard")
+                            router.push("/auth/customer/dashboard")
                             break;
                         }
                         case userType.SERVICE_CENTER.toString(): {
-                            router.push("/service-center/dashboard")
+                            router.push("/auth/service-center/dashboard")
                             break;
                         }
 

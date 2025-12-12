@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import NextAuth, { type DefaultSession } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/db";
-import {
-  fetchUserByRole,
-  fetchUserByRoleForJWT,
-} from "./hooks/user";
+import { fetchUserByRole, fetchUserByRoleForJWT } from "./hooks/user";
 import { Role } from "@prisma/client";
 import type { Adapter } from "next-auth/adapters";
 import { verifyPassword } from "./lib/bcryptjs";
@@ -18,16 +17,23 @@ export type ExtendedUser = {
   role: Role;
 };
 
+export type CredentialsType = {
+  email: string;
+  password: string;
+  role: Role;
+  callbackUrl: string;
+};
+
 declare module "next-auth" {
   interface Session {
     user: ExtendedUser & DefaultSession["user"];
   }
 
-  interface User extends ExtendedUser {} // Safe now
+  interface User extends ExtendedUser {}
 }
 
 declare module "next-auth/jwt" {
-  interface JWT extends ExtendedUser {} // For JWT token (client + server consistency)
+  interface JWT extends ExtendedUser {}
 }
 export const {
   auth,
@@ -90,7 +96,7 @@ export const {
         password: { label: "Password", type: "password" },
         role: { label: "Role", type: "text" },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials) {
         if (
           !credentials?.email ||
           !credentials?.password ||
@@ -98,20 +104,19 @@ export const {
         ) {
           return null;
         }
-        const user = await fetchUserByRole(credentials.role, credentials.email);
+
+        const { email, password, role } = credentials as CredentialsType;
+        const user = await fetchUserByRole(role, email);
         if (!user) return null;
 
-        const isValid = await verifyPassword(
-          credentials.password,
-          user.password
-        );
+        const isValid = await verifyPassword(password, user.password);
         if (!isValid) return null;
 
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: credentials.role,
+          role: role,
         };
       },
     }),

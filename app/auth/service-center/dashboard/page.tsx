@@ -72,7 +72,7 @@ export default function ServiceCenterDashboard() {
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">Appointments</h1>
-            <Link href="/service-center/appointments">
+            <Link href="/auth/service-center/appointments">
               <Button>View All</Button>
             </Link>
           </CardTitle>
@@ -81,7 +81,7 @@ export default function ServiceCenterDashboard() {
 
           <div className="space-y-4 dark:bg-neutral-950 bg-neutral-50 rounded-md shadow-md">
             {appointments.map((appointment) => (
-              <Link href={`/service-center/appointments/${appointment.id}`} key={appointment.id} className="flex justify-between items-center p-4 border rounded">
+              <Link href={`/auth/service-center/appointments/${appointment.id}`} key={appointment.id} className="flex justify-between items-center p-4 border rounded">
                 <div>
                   <h3 className="font-semibold">{appointment.serviceType}</h3>
                   <p>{appointment.Vehicle.vehicleName} - {appointment.Vehicle.vehicleMake} {appointment.Vehicle.vehicleModel}</p>
@@ -110,7 +110,7 @@ export default function ServiceCenterDashboard() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/service-center/inventory">
+        <Link href="/auth/service-center/inventory">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow dark:bg-neutral-800 bg-neutral-100">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Manage Inventory</h3>
@@ -118,7 +118,7 @@ export default function ServiceCenterDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/service-center/invoices">
+        <Link href="/auth/service-center/invoices">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow dark:bg-neutral-800 bg-neutral-100">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Invoices</h3>
@@ -126,7 +126,7 @@ export default function ServiceCenterDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/service-center/reports">
+        <Link href="/auth/service-center/reports">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow dark:bg-neutral-800 bg-neutral-100">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Reports</h3>

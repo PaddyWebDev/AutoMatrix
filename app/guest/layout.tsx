@@ -14,11 +14,11 @@ export default async function GuestLayout({ children }: GuestLayoutProps) {
 
     switch (sessionUser.user.role) {
       case Role.ADMIN:
-        redirect("/admin/dashboard")
+        redirect("/auth/admin/dashboard")
       case Role.CUSTOMER:
-        redirect("/customer/dashboard")
+        redirect("/auth/customer/dashboard")
       case Role.SERVICE_CENTER:
-        redirect("/service-center/dashboard")
+        redirect("/auth/service-center/dashboard")
     }
   }
   return (

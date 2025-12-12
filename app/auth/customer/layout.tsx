@@ -1,22 +1,30 @@
+import { getSessionUser } from '@/hooks/user'
+import { Role } from '@prisma/client'
+import { redirect } from 'next/navigation'
+import React from 'react'
 import Sidebar from '@/components/auth-sidebar'
 import ThemeSwitcher from '@/components/theme-switcher'
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { SessionProvider } from '@/context/session'
-import { getSessionUser } from '@/hooks/user'
 import { linksType } from '@/types/common'
-import { Role } from '@prisma/client'
-import { redirect } from 'next/navigation'
-import React from 'react'
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+
+export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
     const session = await getSessionUser()
-    if (!session || session.user.role !== Role.ADMIN || session === null) {
+    if (!session || session.user.role !== Role.CUSTOMER || session === null) {
         redirect("/guest/Login")
     }
-
     const links: linksType[] = [
         {
-            label: "Dashboard", href: "/admin/dashboard", icon: 'home'
+            label: "Dashboard", href: "/auth/customer/dashboard", icon: "home"
+        },
+        {
+            label: "Find Nearest Center", href: "/auth/customer/appointments/new/nearest-centers", icon: "locateFixedIcon"
+        },
+        {
+            label: "Find Center", href: "/auth/customer/appointments/new/centers-by-city", icon: "search"
+        }, {
+            label: "Invoices", href: "/auth/customer/invoices", icon: "receipt"
         }
     ]
     return (
@@ -30,13 +38,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 />
 
                 {/* Main content area with trigger */}
-                <SidebarInset className=" bg-neutral-50 dark:bg-neutral-900">
+                <SidebarInset className=" bg-neutral-50 dark:bg-neutral-950">
                     {/* Trigger should be visible at the top-left of content */}
-                    <header className="py-2 pl-3  pr-6 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-3 justify-between">
+                    <header className="py-2 pl-3  pr-6 border-b border-neutral-200 dark:border-neutral-800 dark:bg-neutral-800 bg-neutral-100 flex items-center gap-3 justify-between">
                         <div className="flex flew-row items-center gap-2">
                             <SidebarTrigger />
                             <h1 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
-                                Admin Dashboard
+                                Customer Dashboard
                             </h1>
                         </div>
 

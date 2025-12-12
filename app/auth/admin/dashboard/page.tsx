@@ -173,7 +173,7 @@ export default function AdminDashboard() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link href="/admin/users">
+        <Link href="/auth/admin/users">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Manage Users</h3>
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/admin/service-centers">
+        <Link href="/auth/admin/service-centers">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Service Centers</h3>
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/admin/reports">
+        <Link href="/auth/admin/reports">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardContent className="p-6 text-center">
               <h3 className="text-lg font-semibold">Reports</h3>

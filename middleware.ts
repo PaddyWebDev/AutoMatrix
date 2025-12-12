@@ -12,12 +12,12 @@ export default auth(async (request: NextAuthRequest) => {
   const { nextUrl, auth } = request;
   const loggedIn = !!auth;
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isAdminAuthRoute = nextUrl.pathname.startsWith("/admin");
+  const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 
   if (isApiAuthRoute) {
     return;
   }
-  if (!loggedIn && isAdminAuthRoute) {
+  if (!loggedIn && isAuthRoute) {
     return NextResponse.redirect(new URL("/Login", nextUrl));
   }
 

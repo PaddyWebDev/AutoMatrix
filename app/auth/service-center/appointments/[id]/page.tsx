@@ -89,7 +89,7 @@ export default function AppointmentDetailPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Appointment Details</h1>
-        <Button variant="outline" onClick={() => router.push("/service-center/appointments")}>
+        <Button variant="outline" onClick={() => router.push("/auth/service-center/appointments")}>
           Back to Appointments
         </Button>
       </div>
