@@ -5,9 +5,6 @@ import AuthConfig from "./auth.config";
 import { apiAuthPrefix } from "./routes";
 const { auth } = NextAuth(AuthConfig);
 
-
-
-
 export default auth(async (request: NextAuthRequest) => {
   const { nextUrl, auth } = request;
   const loggedIn = !!auth;

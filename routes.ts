@@ -1,16 +1,4 @@
-/**
- * These routes do not require authentication
- * @type {string[]}
- */
 
-
-/**
- * These routes are used for authentication.
- * These routes will redirect logged users to protected routes.
- * @type {string[]}
- */
-
-export const authRoutes: string[] = ["/guest/Login", "/guest/Register"];
 
 /**
  * The prefix for API authentication routes
@@ -20,7 +8,3 @@ export const authRoutes: string[] = ["/guest/Login", "/guest/Register"];
 
 export const apiAuthPrefix: string = "/api";
 
-/**
- * Default redirect path after user has logged in
- * @type {string}
- */

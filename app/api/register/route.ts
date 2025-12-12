@@ -1,27 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+import { calclateLongitudeLatitudeofStation } from "@/hooks/distance";
 import { hashPassword } from "@/lib/bcryptjs";
 import prisma from "@/lib/db";
 import { userType } from "@/types/common";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function calclateLongitudeLatitudeofStation(
-  cityName: string
-): Promise<{
-  lat: string;
-  lon: string;
-} | null> {
-  const response = await axios.get(
-    `https://nominatim.openstreetmap.org/search?q=${cityName}&format=json&limit=1`
-  );
-  if (!response.data) {
-    return null;
-  }
-  return {
-    lat: response.data[0].lat,
-    lon: response.data[0].lon,
-  };
-}
+
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password, phoneNumber, role, city } =
