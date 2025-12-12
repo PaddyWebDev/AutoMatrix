@@ -3,15 +3,13 @@
 import { auth, signOut } from "@/auth";
 import prisma from "@/lib/db";
 import { Role } from "@prisma/client";
-import { redirect } from "next/navigation";
 
 export async function getSessionUser() {
   return await auth();
 }
 
 export async function signOutUser() {
-  await signOut();
-  return redirect("/guest/Login");
+  return await signOut();
 }
 
 export async function getTypeOfUser() {

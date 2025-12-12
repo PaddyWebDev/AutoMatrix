@@ -17,7 +17,7 @@ export default auth(async (request: NextAuthRequest) => {
     return;
   }
   if (!loggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL("/Login", nextUrl));
+    return NextResponse.redirect(new URL("/guest/Login", nextUrl));
   }
 
   return NextResponse.next();
