@@ -30,6 +30,7 @@ import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import toast from "react-hot-toast";
 import { userType } from "@/types/common";
+import { getUserLocation } from "@/hooks/customer";
 
 export default function RegisterForm() {
     const [isPending, startTransition] = useTransition();
@@ -55,10 +56,21 @@ export default function RegisterForm() {
                 toast.error("Failed to validate Fields");
                 return;
             }
+            let payload;
+            if (validatedFields.data.role === userType.SERVICE_CENTER.toString()) {
+                const userData = await getUserLocation();
+                payload = {
+                    "latitude": userData?.lat,
+                    "longitude": userData?.lng,
+                }
+            }
+
 
 
             await axios
-                .post("/api/register", validatedFields.data)
+                .post("/api/register", {
+                    ...payload, ...validatedFields.data
+                })
                 .then(() => {
                     toast.success(
                         "Registration Success"
@@ -193,9 +205,6 @@ export default function RegisterForm() {
                                                             </SelectItem>
                                                             <SelectItem value={userType.SERVICE_CENTER.toString()}>
                                                                 Service Center
-                                                            </SelectItem>
-                                                            <SelectItem value={userType.ADMIN.toString()}>
-                                                                Admin
                                                             </SelectItem>
 
                                                         </SelectGroup>

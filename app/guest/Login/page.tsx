@@ -11,7 +11,7 @@ import { userType } from '@/types/common'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios, { AxiosError } from 'axios'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
@@ -21,6 +21,9 @@ import { z } from 'zod'
 type LoginForm = z.infer<typeof loginSchema>
 export default function Login() {
     const router = useRouter()
+    const searchParam = useSearchParams();
+
+
     const [isPending, startTransition] = useTransition()
     const [showPassword, setShowPassword] = useState<boolean>(false)
     const loginForm = useForm<LoginForm>({
@@ -31,6 +34,7 @@ export default function Login() {
             role: ""
         }
     })
+
     // async function handleSocialLogin(provider: "google" | "github") {
     //     await socialLogin(provider)
     // }
@@ -42,17 +46,21 @@ export default function Login() {
                 toast.error("Failed to validate");
                 return;
             }
+            if (searchParam.get("role")) {
+                validatedFields.data.role = userType.ADMIN.toString()
+            }
+
+            console.log(validatedFields.data);
 
             await axios.post("/api/login", validatedFields.data)
                 .then((data) => {
                     toast.success(data.data!)
                     loginForm.reset()
+                    if (searchParam.get("role")) {
+                        router.push("/auth/admin/dashboard")
+                    }
 
                     switch (validatedFields.data.role) {
-                        case userType.ADMIN.toString(): {
-                            router.push("/auth/admin/dashboard")
-                            break;
-                        }
                         case userType.CUSTOMER.toString(): {
                             router.push("/auth/customer/dashboard")
                             break;
@@ -141,19 +149,12 @@ export default function Login() {
                                             <SelectContent>
                                                 <SelectGroup>
                                                     <SelectLabel>Role</SelectLabel>
-
-                                                    <SelectItem value={userType.ADMIN.toString()}>
-                                                        Admin
-                                                    </SelectItem>
-
                                                     <SelectItem value={userType.CUSTOMER.toString()}>
                                                         Customer
                                                     </SelectItem>
-
                                                     <SelectItem value={userType.SERVICE_CENTER.toString()}>
                                                         Service Center
                                                     </SelectItem>
-
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>

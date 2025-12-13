@@ -1,5 +1,6 @@
 import { signIn } from "@/auth";
 import { fetchUserByRole } from "@/hooks/user";
+import { ADMIN_PASS } from "@/lib/admin";
 import { verifyPassword } from "@/lib/bcryptjs";
 import { userType } from "@/types/common";
 import { Role } from "@prisma/client";
@@ -8,20 +9,27 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   try {
     const { role, email, password } = await request.json();
-
     if (!email || !password) {
       return new NextResponse("Missing fields", { status: 400 });
     }
     const roleUpperCase = userType[role].toUpperCase() || "ADMIN";
-    console.log(roleUpperCase);
+    let checkUserExist;
+    if (roleUpperCase === userType.ADMIN.toString()) {
+      checkUserExist = {
+        id: process.env.ADMIN_ID,
+        name: "Admin",
+        email: process.env.ADMIN_EMAIL!,
+        password: ADMIN_PASS as string,
+      };
+    } else {
+      checkUserExist = await fetchUserByRole(roleUpperCase as Role, email);
+    }
 
-    const checkUserExist = await fetchUserByRole(roleUpperCase as Role, email);
     if (!checkUserExist) {
       return new NextResponse("User doesn't exist on the system", {
         status: 404,
       });
     }
-
     const verifyPass = await verifyPassword(password, checkUserExist.password);
     if (!verifyPass) {
       return new NextResponse("Invalid password", {

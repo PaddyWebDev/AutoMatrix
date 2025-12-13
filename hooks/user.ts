@@ -1,6 +1,7 @@
 "use server";
 
 import { auth, signOut } from "@/auth";
+import { ADMIN_PASS } from "@/lib/admin";
 import prisma from "@/lib/db";
 import { Role } from "@prisma/client";
 
@@ -53,7 +54,7 @@ export async function fetchUserByRole(
   email: string
 ): Promise<fetchUserByRole | null> {
   switch (role) {
-    case Role.CUSTOMER: {
+    case Role.CUSTOMER.toString(): {
       return await prisma.user.findUnique({
         where: {
           email: email,
@@ -66,7 +67,7 @@ export async function fetchUserByRole(
         },
       });
     }
-    case Role.SERVICE_CENTER: {
+    case Role.SERVICE_CENTER.toString(): {
       return await prisma.serviceCenter.findUnique({
         where: {
           email: email,
@@ -79,15 +80,15 @@ export async function fetchUserByRole(
         },
       });
     }
-    case Role.ADMIN: {
+    case Role.ADMIN.toString(): {
       if (email !== process.env.ADMIN_EMAIL) {
         return null;
       }
       return {
-        id: "admin",
-        email: email,
+        id: process.env.ADMIN_ID!,
         name: "Admin",
-        password: process.env.ADMIN_PASS!,
+        email: process.env.ADMIN_EMAIL!,
+        password: ADMIN_PASS as string,
       };
     }
     default: {
