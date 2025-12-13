@@ -3,16 +3,16 @@ import axios from "axios";
 import { AppointmentServiceCenter } from "@/types/service-center";
 import { Inventory } from "@prisma/client";
 
-
 export function useAppointment(appointmentId: string) {
   return useQuery<AppointmentServiceCenter>({
-    queryKey: ["appointment-service-center"],
+    queryKey: ["appointment-service-center", appointmentId],
     queryFn: async () => {
       const response = await axios.get(
         `/api/service-centers/appointments/get?appointmentId=${appointmentId}`
       );
       return response.data.appointment_data;
     },
+    enabled: !!appointmentId,
   });
 }
 

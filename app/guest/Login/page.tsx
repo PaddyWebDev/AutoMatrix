@@ -147,15 +147,12 @@ export default function Login() {
                                             </SelectTrigger>
 
                                             <SelectContent>
-                                                <SelectGroup>
-                                                    <SelectLabel>Role</SelectLabel>
-                                                    <SelectItem value={userType.CUSTOMER.toString()}>
-                                                        Customer
-                                                    </SelectItem>
-                                                    <SelectItem value={userType.SERVICE_CENTER.toString()}>
-                                                        Service Center
-                                                    </SelectItem>
-                                                </SelectGroup>
+                                                <SelectItem value={userType.CUSTOMER.toString()}>
+                                                    Customer
+                                                </SelectItem>
+                                                <SelectItem value={userType.SERVICE_CENTER.toString()}>
+                                                    Service Center
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </FormControl>

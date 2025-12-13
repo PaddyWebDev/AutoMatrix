@@ -46,8 +46,7 @@ export default function NewJobCard({ appointmentId, disabledStatus }: NewJobCard
                     ...validatedFields.data,
                     appointmentId: appointmentId
                 })
-                console.log(response.data);
-                queryClient.setQueryData(["appointment-service-center"], function (prevData: AppointmentServiceCenter
+                queryClient.setQueryData(["appointment-service-center", appointmentId], function (prevData: AppointmentServiceCenter
                 ) {
                     if (!prevData) return prevData;
                     return {
@@ -55,6 +54,9 @@ export default function NewJobCard({ appointmentId, disabledStatus }: NewJobCard
                         JobCards: [...prevData.JobCards, response.data.new_job_card],
                     };
                 })
+
+
+                console.log(queryClient.getQueryData(["appointment-service-center", appointmentId]));
 
                 toast.success(response.data.message)
                 form.reset();

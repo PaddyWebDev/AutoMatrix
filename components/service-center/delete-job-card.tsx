@@ -23,7 +23,7 @@ export default function DeleteJobCard({ appointmentId, jobCardId, disabledStatus
                 // todo send data to backend and handle the updation on the dashboard
                 const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/job-card/delete/${jobCardId}?appointmentId=${appointmentId}`)
                 console.log(response.data);
-                queryClient.setQueryData(["appointment-service-center"], function (prevData: AppointmentServiceCenter
+                queryClient.setQueryData(["appointment-service-center", appointmentId], function (prevData: AppointmentServiceCenter
                 ) {
                     if (!prevData) return prevData;
                     const updatedCards = prevData.JobCards.filter((jobCard) => jobCard.id !== jobCardId)

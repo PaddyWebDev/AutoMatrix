@@ -41,7 +41,7 @@ export default function AddVehiclePage() {
             vehicleMake: "",
             vehicleModel: "",
             numberPlate: "",
-            vehicleType: "CAR",
+            vehicleType: undefined,
         },
     });
 
@@ -67,6 +67,7 @@ export default function AddVehiclePage() {
                     }
                 );
                 toast.success(response.data.message)
+                form.reset()
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     toast.error(error.response?.data || "Failed to add vehicle")
@@ -146,18 +147,19 @@ export default function AddVehiclePage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Vehicle Type</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
-                                        <FormControl>
+                                    <FormControl>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
                                             <SelectTrigger className="w-full" >
                                                 <SelectValue placeholder="Select vehicle type" />
                                             </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="CAR">Car</SelectItem>
-                                            <SelectItem value="TRUCK">Truck</SelectItem>
-                                            <SelectItem value="BIKE">Bike</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                            <SelectContent>
+                                                <SelectItem value="CAR">Car</SelectItem>
+                                                <SelectItem value="TRUCK">Truck</SelectItem>
+                                                <SelectItem value="BIKE">Bike</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -191,6 +193,6 @@ export default function AddVehiclePage() {
                     </form>
                 </Form>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

@@ -66,7 +66,7 @@ export default function CustomerDashboard() {
           {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 dark:bg-neutral-950 bg-neutral-50 shadow-md rounded-md p-5">
+            <div className="flex items-center justify-start gap-4 dark:bg-neutral-950 bg-neutral-50 shadow-md rounded-md p-5">
               {vehicles.map((vehicle: Vehicle) => (
                 <Card key={vehicle.id} className="w-[300px]">
                   <CardHeader className="-mb-4">

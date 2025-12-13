@@ -51,7 +51,7 @@ export default function AddPartsToJobCard({ appointmentId, jobCardId, serviceCen
                 })
 
                 queryClient.setQueryData(
-                    ["appointment-service-center"],
+                    ["appointment-service-center", appointmentId],
                     (prev: AppointmentServiceCenter | undefined): AppointmentServiceCenter | undefined => {
                         if (!prev) return prev;
 
@@ -64,7 +64,7 @@ export default function AddPartsToJobCard({ appointmentId, jobCardId, serviceCen
                                     ...jobCard,
                                     price: jobCard.price + response.data.new_part_job_card.partUsed.unitPrice,
                                     JobCardParts: [
-                                        ...jobCard.JobCardParts,
+                                        ...(jobCard.JobCardParts ?? []),
                                         response.data.new_part_job_card
                                     ]
                                 };
@@ -72,6 +72,9 @@ export default function AddPartsToJobCard({ appointmentId, jobCardId, serviceCen
                         };
                     }
                 );
+
+                console.log(queryClient.getQueryData(
+                    ["appointment-service-center", appointmentId]));
 
                 toast.success(response.data.message)
                 form.reset()

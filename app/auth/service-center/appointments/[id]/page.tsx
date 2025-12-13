@@ -21,13 +21,14 @@ import queryClient from "@/lib/tanstack-query";
 import { AppointmentServiceCenter } from "@/types/service-center";
 import { bookingStatus } from "@prisma/client";
 import GenerateInvoice from "@/components/service-center/generate-invoice";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { Session } from "next-auth";
 
 
 export default function AppointmentDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { session } = useSessionContext();
-  const [isPending, startTransition] = React.useTransition();
   const { data: appointment, isLoading, isError, isFetching } = useAppointment(id as string)
   if (!id) {
     router.push("/service-center/dashboard")
@@ -45,12 +46,26 @@ export default function AppointmentDetailPage() {
     )
   }
 
+  return (
+    <RenderAppointmentData appointment={appointment} router={router} id={id as string} session={session} />
+  )
+
+}
+
+interface RenderAppointmentDataProps {
+  appointment: AppointmentServiceCenter;
+  router: AppRouterInstance;
+  id: string
+  session: Session | null
+}
+function RenderAppointmentData({ appointment, router, id, session }: RenderAppointmentDataProps) {
+  const [isPending, startTransition] = React.useTransition();
 
   async function updateAppointmentStatus(updatedStatus: string) {
     startTransition(async () => {
       try {
         const response = await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${id}/status/update`, { status: updatedStatus })
-        queryClient.setQueryData(["appointment-service-center"], function (prevData: AppointmentServiceCenter): AppointmentServiceCenter {
+        queryClient.setQueryData(["appointment-service-center", id], function (prevData: AppointmentServiceCenter): AppointmentServiceCenter {
           if (!prevData) return prevData
           return {
             ...prevData,
@@ -68,23 +83,27 @@ export default function AppointmentDetailPage() {
     })
   }
 
+  const { totalCost, labourCharges } = React.useMemo(() => {
+    let labour = 0;
+    let total = 0;
 
+    appointment.JobCards.forEach(jobCard => {
+      const price = Number(jobCard.price ?? 0);
+      if (!jobCard.JobCardParts) {
+        return;
+      }
+      const partsCost = jobCard.JobCardParts.reduce(
+        (sum, part) =>
+          sum + (Number(part.quantity) * Number(part.partUsed?.unitPrice ?? 0)),
+        0
+      );
 
-  const totalCost = appointment.JobCards.reduce(
-    (sum, job) =>
-      sum + (job.price || 0), 0
-  );
+      labour += Math.max(price - partsCost, 0);
+      total += price;
+    });
 
-  let labourCharges = 0;
-
-  appointment.JobCards.forEach(jobCard => {
-    const partsCost = jobCard.JobCardParts.reduce(
-      (sum, part) => sum + part.quantity * part.partUsed.unitPrice,
-      0
-    );
-
-    labourCharges += jobCard.price - partsCost;
-  });
+    return { totalCost: total, labourCharges: labour };
+  }, [appointment.JobCards]);
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
@@ -169,7 +188,9 @@ export default function AppointmentDetailPage() {
         <CardContent className="flex flex-col ">
           <div className="mb-4">
             <NewJobCard appointmentId={id as string} disabledStatus={appointment.status === "COMPLETED"} />
-            <GenerateInvoice appointmentId={id as string} totalAmount={totalCost} />
+            {appointment.status === "COMPLETED" && !appointment?.Invoice && (
+              <GenerateInvoice appointmentId={id as string} totalAmount={totalCost} disabledStatus={!!appointment.Invoice} />
+            )}
           </div>
           <div className="">
 
@@ -194,10 +215,10 @@ export default function AppointmentDetailPage() {
                         <p className="text-xs text-gray-500">No parts added</p>
                       ) : (
                         <div className="space-y-1">
-                          {jobCard.JobCardParts.map((part, index: number) => (
+                          {jobCard.JobCardParts && jobCard.JobCardParts.map((part, index: number) => (
                             <div key={index} className="text-xs flex justify-between">
                               <span>{part.partUsed.name} (x{part.quantity})</span>
-                              <span>${(part.partUsed.unitPrice * part.quantity).toFixed(2)}</span>
+                              <span>₹ {(part.partUsed.unitPrice * part.quantity).toFixed(2)}</span>
                             </div>
                           ))}
                         </div>

@@ -24,17 +24,18 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useVehicles, useServiceCentersFetchAll } from "@/hooks/customer";
-import queryClient from "@/lib/tanstack-query";
 import { useSessionContext } from "@/context/session";
 import { AppointmentPriority, ServiceCenter, Vehicle } from "@prisma/client";
 import { createAppointmentSchema, createAppointmentSchemaType } from "@/lib/validations/auth-route-forms";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { AppointmentDatePicker } from "@/components/AppointmentDatePicker";
+import { useRouter } from "next/navigation";
 
 
 
 export default function BookAppointmentPage() {
+  const router = useRouter();
   const { session } = useSessionContext();
   const [isPending, startTransition] = React.useTransition();
 
@@ -44,9 +45,9 @@ export default function BookAppointmentPage() {
   const form = useForm<createAppointmentSchemaType>({
     resolver: zodResolver(createAppointmentSchema),
     defaultValues: {
-      vehicleId: "",
-      serviceType: "",
-      serviceCenterId: "",
+      vehicleId: undefined,
+      serviceType: undefined,
+      serviceCenterId: undefined,
       priority: undefined,
       serviceDeadline: undefined
     },
@@ -73,13 +74,14 @@ export default function BookAppointmentPage() {
           toast.error("Failed to validated the fields")
           return;
         }
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/create`, {
+        await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/create`, {
           ...validatedFields.data,
           userId: session?.user.id,
         });
-        console.log(response.data);
         toast.success("Appointment booked successfully!");
-        queryClient.invalidateQueries({ queryKey: ["appointments", session?.user.id] });
+        router.push("/customer/dashboard")
+
+        form.reset()
       } catch (error) {
         if (axios.isAxiosError(error)) {
           toast.error(error.response?.data || "Failed to book appointment");
@@ -106,20 +108,22 @@ export default function BookAppointmentPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select Vehicle</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}
+                        disabled={isPending}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Choose your vehicle" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {vehicles.map((vehicle: Vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            {vehicle.vehicleName} - {vehicle.vehicleMake} {vehicle.vehicleModel}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {vehicles.map((vehicle: Vehicle) => (
+                            <SelectItem key={vehicle.id} value={vehicle.id}>
+                              {vehicle.vehicleName} - {vehicle.vehicleMake} {vehicle.vehicleModel}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -131,20 +135,23 @@ export default function BookAppointmentPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select Nearest Service Center</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} >
-                      <FormControl>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}
+                        disabled={isPending}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Choose nearest service center" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {serviceCenters.map((center: ServiceCenter) => (
-                          <SelectItem key={center.id} value={center.id}>
-                            {center.name} - {center.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {serviceCenters.map((center: ServiceCenter) => (
+                            <SelectItem key={center.id} value={center.id}>
+                              {center.name} - {center.city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -157,7 +164,7 @@ export default function BookAppointmentPage() {
                   <FormItem>
                     <FormLabel>Service Type</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Oil Change, Brake Repair" {...field} />
+                      <Input placeholder="e.g., Oil Change, Brake Repair" disabled={isPending} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -170,7 +177,9 @@ export default function BookAppointmentPage() {
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}
+                        disabled={isPending}
+                      >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Choose the priority" />
                         </SelectTrigger>
@@ -214,6 +223,6 @@ export default function BookAppointmentPage() {
           </Form>
         </CardContent>
       </Card>
-    </section>
+    </section >
   );
 }

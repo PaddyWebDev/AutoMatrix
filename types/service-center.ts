@@ -16,6 +16,9 @@ export type AppointmentServiceCenter = {
     email: string;
     name: string;
   };
+  Invoice: {
+    billingDate: true;
+  };
   JobCards: Array<{
     id: string;
     jobName: string;

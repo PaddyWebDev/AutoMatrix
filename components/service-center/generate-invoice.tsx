@@ -11,22 +11,37 @@ import { Button } from "../ui/button";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { DialogClose } from '@radix-ui/react-dialog';
+import queryClient from '@/lib/tanstack-query';
+import { AppointmentServiceCenter } from '@/types/service-center';
 
 interface GenerateInvoiceProps {
     appointmentId: string;
     totalAmount: number;
+    disabledStatus: boolean
 }
 
-export default function GenerateInvoice({ appointmentId, totalAmount }: GenerateInvoiceProps) {
+export default function GenerateInvoice({ appointmentId, totalAmount, disabledStatus }: GenerateInvoiceProps) {
     const [isPending, startTransition] = React.useTransition();
 
     const onGenerateSubmit = async () => {
         startTransition(async () => {
             try {
-                await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/invoice/create`, {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/invoice/create`, {
                     totalAmount,
                 });
-                toast.success("Invoice generated successfully");
+
+                queryClient.setQueryData(["appointment-service-center", appointmentId], function (prevData: AppointmentServiceCenter): AppointmentServiceCenter {
+                    if (!prevData) return prevData;
+
+                    return {
+                        ...prevData,
+                        Invoice: {
+                            billingDate: response.data.billing_date
+                        }
+                    }
+                })
+                toast.success(response.data.message);
+
             } catch (error) {
                 toast.error(axios.isAxiosError(error) ? error.response?.data : "Error Occurred while generating the invoice")
             }
@@ -35,7 +50,7 @@ export default function GenerateInvoice({ appointmentId, totalAmount }: Generate
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
+            <DialogTrigger asChild disabled={disabledStatus}>
                 <Button>Generate Invoice</Button>
             </DialogTrigger>
 

@@ -14,7 +14,7 @@ import Loader from "@/components/Loader";
 export default function AdminDashboard() {
   const { session } = useSessionContext();
 
-  const { data, isLoading, isError, isFetched } = useQuery<Array<number>>({
+  const { data, isLoading, isError, isFetching } = useQuery<Array<number>>({
     queryKey: ["stats"],
     queryFn: async () => {
       const response = await axios.get(`/api/admin/stats`)
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     }
   })
 
-  if (isLoading || isFetched) {
+  if (isLoading || isFetching) {
     return (
       <Loader />
     )

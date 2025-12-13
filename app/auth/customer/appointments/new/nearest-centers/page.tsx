@@ -17,13 +17,13 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useVehicles, useServiceCenters } from "@/hooks/customer";
-import queryClient from "@/lib/tanstack-query";
 import { useSessionContext } from "@/context/session";
 import { AppointmentPriority, Vehicle } from "@prisma/client";
 import Loader from "@/components/Loader";
@@ -31,10 +31,12 @@ import TanstackError from "@/components/TanstackError";
 import { createAppointmentSchema, createAppointmentSchemaType } from "@/lib/validations/auth-route-forms";
 import React from "react";
 import { AppointmentDatePicker } from "@/components/AppointmentDatePicker";
+import { useRouter } from "next/navigation";
 
 
 
 export default function BookAppointmentPage() {
+  const router = useRouter()
   const { session } = useSessionContext();
   const [isPending, startTransition] = React.useTransition()
 
@@ -47,6 +49,8 @@ export default function BookAppointmentPage() {
       vehicleId: "",
       serviceType: "",
       serviceCenterId: "",
+      priority: undefined,
+      serviceDeadline: undefined,
     },
   });
 
@@ -76,7 +80,7 @@ export default function BookAppointmentPage() {
         });
 
         toast.success("Appointment booked successfully!");
-        queryClient.invalidateQueries({ queryKey: ["appointments", session?.user.id] });
+        router.push("/customer/dashboard")
         form.reset();
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
@@ -102,7 +106,7 @@ export default function BookAppointmentPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select Vehicle</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                       <FormControl>
                         <SelectTrigger className="w-full" disabled={isPending}>
                           <SelectValue placeholder="Choose your vehicle" />

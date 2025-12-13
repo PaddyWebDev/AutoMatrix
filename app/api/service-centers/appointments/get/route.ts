@@ -31,6 +31,11 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
+        Invoice: {
+          select: {
+            billingDate: true,
+          },
+        },
         JobCards: {
           select: {
             jobDescription: true,
