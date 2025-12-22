@@ -20,8 +20,8 @@ import { useSessionContext } from "@/context/session";
 import socket from "@/lib/socket-io";
 import { decryptSocketData } from "@/hooks/cryptr";
 import queryClient from "@/lib/tanstack-query";
-import AppointmentStatus from "@/components/service-center/status-appointment";
-import { bookingStatus } from "@prisma/client";
+import { Appointment } from "@prisma/client";
+import { AppointmentsResponse } from "@/types/customer";
 
 const filterSchema = z.object({
     status: z.string().optional(),
@@ -30,32 +30,6 @@ const filterSchema = z.object({
 
 type FilterForm = z.infer<typeof filterSchema>;
 
-interface Appointment {
-    id: string;
-    serviceType: string;
-    status: string;
-    requestedDate: string;
-    actualCompletionDate?: string;
-    slaDeadline?: string;
-    Vehicle: {
-        vehicleName: string;
-        vehicleMake: string;
-        vehicleModel: string;
-    };
-    owner: {
-        name: string;
-        email: string;
-    };
-}
-
-interface AppointmentsResponse {
-    success: boolean;
-    appointments: Appointment[];
-    totalCount: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-}
 
 export default function AppointmentsPage() {
     const { session } = useSessionContext();
@@ -72,14 +46,15 @@ export default function AppointmentsPage() {
     const filters = form.watch();
 
     const { data, isLoading, isError } = useQuery<AppointmentsResponse>({
-        queryKey: ["appointments-service-center", currentPage, filters],
+        queryKey: ["appointments-customer", currentPage, filters],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
             });
             if (filters.status) params.append("status", filters.status);
             if (filters.serviceType) params.append("serviceType", filters.serviceType);
-            const response = await axios.get(`/api/service-centers/appointments?${params}&userId=${session?.user.id}`);
+            const response = await axios.get(`/api/customer/appointments?${params}&userId=${session?.user.id}`);
+            console.log(response);
             return response.data;
         },
         enabled: !!session,
@@ -95,7 +70,7 @@ export default function AppointmentsPage() {
     };
     React.useEffect(() => {
         async function newAppointment(newAppt: Appointment) {
-            queryClient.setQueryData(['appointments-service-center'], function (prevData: Appointment[] = []) {
+            queryClient.setQueryData(['appointments-customer'], function (prevData: Appointment[] = []) {
                 return [...prevData, newAppt]
             })
         }
@@ -112,6 +87,8 @@ export default function AppointmentsPage() {
         return <TanstackError />;
     }
 
+
+    console.log(data);
 
 
 
@@ -186,7 +163,7 @@ export default function AppointmentsPage() {
                                 <TableRow>
                                     <TableHead>Service Type</TableHead>
                                     <TableHead>Vehicle</TableHead>
-                                    <TableHead>Owner</TableHead>
+                                    <TableHead>Service Center</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Requested Date</TableHead>
                                     <TableHead>Actions</TableHead>
@@ -200,32 +177,20 @@ export default function AppointmentsPage() {
                                             {appointment.Vehicle.vehicleName} - {appointment.Vehicle.vehicleMake} {appointment.Vehicle.vehicleModel}
                                         </TableCell>
                                         <TableCell>
-                                            {appointment.owner.name} ({appointment.owner.email})
+                                            {appointment.serviceCenter.name} ({appointment.serviceCenter.phoneNumber})
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={appointment.status === "COMPLETED" ? "default" : appointment.status === "REJECTED" ? "destructive" : "secondary"}>
+                                            <Badge variant={appointment.status === "COMPLETED" ? "default" : "secondary"}>
                                                 {appointment.status}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>{format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}</TableCell>
                                         <TableCell>
-                                            {
-                                                ([bookingStatus.APPROVED.toString(), bookingStatus.InService.toString(), bookingStatus.COMPLETED.toString()].includes(appointment.status)) && (
-                                                    <Link href={`/auth/service-center/appointments/${appointment.id}`}>
-                                                        <Button size="sm" variant="secondary" className="  cursor-pointer">
-                                                            View
-                                                        </Button>
-                                                    </Link>
-                                                )
-                                            }
-                                            {
-                                                appointment.status === "PENDING" && (
-                                                    <div className="flex items-center gap-2">
-                                                        <AppointmentStatus appointmentId={appointment.id} status="REJECTED" />
-                                                        <AppointmentStatus appointmentId={appointment.id} status="APPROVED" />
-                                                    </div>
-                                                )
-                                            }
+                                            <Link href={`/auth/customer/appointments/${appointment.id}`}>
+                                                <Button size="sm" variant="secondary" className="  cursor-pointer">
+                                                    View
+                                                </Button>
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 ))}

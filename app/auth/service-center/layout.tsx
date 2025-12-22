@@ -7,6 +7,7 @@ import { SessionProvider } from '@/context/session'
 import Sidebar from '@/components/auth-sidebar'
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import ThemeSwitcher from '@/components/theme-switcher'
+import ServiceCenterNotifications from '@/components/service-center/notification'
 
 export default async function ServiceCenterLayout({ children }: { children: React.ReactNode }) {
     const session = await getSessionUser()
@@ -20,6 +21,8 @@ export default async function ServiceCenterLayout({ children }: { children: Reac
             label: "Appointments", href: "/auth/service-center/appointments", icon: "calendarDays"
         }, {
             label: "Inventory", href: "/auth/service-center/inventory", icon: "boxes"
+        }, {
+            label: "Invoices", href: "/auth/service-center/invoices", icon: "receipt"
         }
     ]
 
@@ -40,11 +43,13 @@ export default async function ServiceCenterLayout({ children }: { children: Reac
                         <div className="flex flew-row items-center gap-2">
                             <SidebarTrigger />
                             <h1 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
-                                Service Center Dashboard
+                                Service Center
                             </h1>
                         </div>
-
-                        <ThemeSwitcher />
+                        <div className='flex items-center gap-3 mr-3'>
+                            <ServiceCenterNotifications />
+                            <ThemeSwitcher />
+                        </div>
                     </header>
 
                     {/* Page content */}

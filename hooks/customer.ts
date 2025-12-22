@@ -20,7 +20,7 @@ export const useAppointments = (userId?: string) => {
     queryKey: ["appointments", userId],
     queryFn: async () => {
       const response = await axios.get(
-        `/api/customer/appointments?userId=${userId}`
+        `/api/customer/appointments/dashboard?userId=${userId}`
       );
       return response.data.appointment_data;
     },

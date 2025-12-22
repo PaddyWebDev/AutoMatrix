@@ -7,6 +7,7 @@ import ThemeSwitcher from '@/components/theme-switcher'
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { SessionProvider } from '@/context/session'
 import { linksType } from '@/types/common'
+import CustomerNotifications from '@/components/customer/notifications'
 
 
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,8 @@ export default async function CustomerLayout({ children }: { children: React.Rea
             label: "Find Center", href: "/auth/customer/appointments/new/centers-by-city", icon: "search"
         }, {
             label: "Invoices", href: "/auth/customer/invoices", icon: "receipt"
+        }, {
+            label: "Appointments", href: "/auth/customer/appointments", icon: "calendarDays"
         }
     ]
     return (
@@ -47,8 +50,10 @@ export default async function CustomerLayout({ children }: { children: React.Rea
                                 Customer Dashboard
                             </h1>
                         </div>
-
-                        <ThemeSwitcher />
+                        <div className='flex items-center gap-3'>
+                            <CustomerNotifications />
+                            <ThemeSwitcher />
+                        </div>
                     </header>
 
                     {/* Page content */}

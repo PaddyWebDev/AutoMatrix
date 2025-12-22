@@ -150,7 +150,7 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
           </div>
 
           <div className="flex space-x-2">
-            {appointment.status === 'PENDING' && (
+            {appointment.status === 'APPROVED' && (
               <Button disabled={isPending} onClick={() => updateAppointmentStatus('InService')}>
                 {isPending ? "Updating..." : "Start Service"}
               </Button>

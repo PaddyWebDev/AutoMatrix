@@ -79,7 +79,7 @@ export default function BookAppointmentPage() {
           userId: session?.user.id,
         });
         toast.success("Appointment booked successfully!");
-        router.push("/customer/dashboard")
+        router.push("/auth/customer/dashboard")
 
         form.reset()
       } catch (error) {

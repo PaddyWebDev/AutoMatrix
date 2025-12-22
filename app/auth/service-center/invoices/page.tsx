@@ -62,15 +62,15 @@ export default function ServiceCenterInvoicesPage() {
 
  
 
-  const { data: invoices, isLoading, isError } = useQuery<Invoice[]>({
+  const { data: invoices = [], isLoading, isError } = useQuery<Invoice[]>({
     queryKey: ['invoices', session?.user.id, filters],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (filters.status) params.append('status', filters.status);
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
-      const response = await axios.get(`/api/service-centers/invoices?${params}&userId=${session?.user.id}`);
-      return response.data;
+      const response = await axios.get(`/api/service-centers/invoices?userId=${session?.user.id}&${params}`);
+      return response.data.invoice_data;
     },
     enabled: !!session?.user.id,
   });
@@ -195,7 +195,7 @@ export default function ServiceCenterInvoicesPage() {
                   <TableCell>{invoice.appointment.owner.name}</TableCell>
                   <TableCell>{invoice.appointment.Vehicle.vehicleName} ({invoice.appointment.Vehicle.vehicleMake} {invoice.appointment.Vehicle.vehicleModel})</TableCell>
                   <TableCell>{invoice.appointment.serviceType}</TableCell>
-                  <TableCell>${invoice.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell>₹ {invoice.totalAmount.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusBadgeVariant(invoice.status)}>
                       {invoice.status}

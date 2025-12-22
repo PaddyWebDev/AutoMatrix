@@ -17,7 +17,6 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -80,7 +79,7 @@ export default function BookAppointmentPage() {
         });
 
         toast.success("Appointment booked successfully!");
-        router.push("/customer/dashboard")
+        router.push("/auth/customer/dashboard")
         form.reset();
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {

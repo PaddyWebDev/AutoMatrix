@@ -1,3 +1,5 @@
+import { bookingStatus } from "@prisma/client";
+
 export interface customerInvoice {
   id: string;
   invoiceNumber: string;
@@ -50,6 +52,7 @@ export interface customerInvoice {
 export type customerAppointment = {
   id: string;
   serviceType: string;
+  status: bookingStatus;
   serviceCenter: {
     name: string;
     city: string;
@@ -57,3 +60,28 @@ export type customerAppointment = {
   };
   requestedDate: Date;
 };
+
+export interface AppointmentsResponse {
+  success: boolean;
+  appointments: {
+    status: bookingStatus;
+    serviceType: string;
+    id: string;
+    serviceCenter: {
+      name: string;
+      phoneNumber: string;
+    };
+    requestedDate: Date;
+    slaDeadline: Date | null;
+    actualCompletionDate: Date | null;
+    Vehicle: {
+      vehicleName: string;
+      vehicleMake: string;
+      vehicleModel: number;
+    };
+  }[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

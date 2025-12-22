@@ -37,12 +37,18 @@ export async function GET(request: NextRequest) {
     if (status) {
       invoices = await dynamicWhereClause({
         status: status as InvoiceStatus,
+        appointment: {
+          serviceCenterId: userId,
+        },
       });
     } else if (startDate && endDate) {
       invoices = await dynamicWhereClause({
         billingDate: {
           gte: new Date(startDate),
           lte: new Date(endDate),
+        },
+        appointment: {
+          serviceCenterId: userId,
         },
       });
     } else {
@@ -53,12 +59,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(invoices);
+    const safeInvoices = invoices.map((inv) => ({
+      ...inv,
+      invoiceCount: inv.invoiceCount.toString(),
+    }));
+
+    return NextResponse.json(
+      {
+        message: "Success",
+        invoice_data: safeInvoices,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching invoices:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return new NextResponse("Internal server error", { status: 500 });
   }
 }

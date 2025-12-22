@@ -128,3 +128,10 @@ export const addPartSchema = z.object({
 });
 export type AddPartForm = z.infer<typeof addPartSchema>;
 
+export const reportFilterSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  serviceCenterId: z.string().optional(),
+});
+
+export type ReportFilter = z.infer<typeof reportFilterSchema>;

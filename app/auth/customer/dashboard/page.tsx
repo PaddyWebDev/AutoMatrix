@@ -7,7 +7,7 @@ import { useAppointments, useVehicles } from "@/hooks/customer";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import AddVehiclePage from "@/components/customer/new-vehicle-form";
-import {  Vehicle } from "@prisma/client";
+import { Vehicle } from "@prisma/client";
 import { format } from "date-fns";
 import { customerAppointment } from "@/types/customer";
 
@@ -66,7 +66,7 @@ export default function CustomerDashboard() {
           {vehicles.length === 0 ? (
             <p>No vehicles added yet.</p>
           ) : (
-            <div className="flex items-center justify-start gap-4 dark:bg-neutral-950 bg-neutral-50 shadow-md rounded-md p-5">
+            <div className="flex items-center justify-start flex-wrap gap-4 dark:bg-neutral-950 bg-neutral-50 shadow-md rounded-md p-5">
               {vehicles.map((vehicle: Vehicle) => (
                 <Card key={vehicle.id} className="w-[300px]">
                   <CardHeader className="-mb-4">
@@ -94,7 +94,7 @@ export default function CustomerDashboard() {
           <CardTitle className="text-3xl font-bold">My Appointments</CardTitle>
         </CardHeader>
         <CardContent className="dark:bg-neutral-950 bg-neutral-50 p-5 rounded-md mx-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {appointments.map((appointment: customerAppointment) => (
+          {appointments.map((appointment: customerAppointment,) => (
             <Card key={appointment.id} className="">
               <CardHeader className="-mb-10">
                 <CardTitle className="text-2xl font-bold text-center">
@@ -114,6 +114,9 @@ export default function CustomerDashboard() {
                   </p>
                   <p>
                     <strong>Requested Date: </strong>{format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}
+                  </p>
+                  <p>
+                    <strong>Status: </strong>{appointment.status}
                   </p>
                 </div>
               </CardContent>
