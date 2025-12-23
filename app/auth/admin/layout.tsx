@@ -17,6 +17,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const links: linksType[] = [
         {
             label: "Dashboard", href: "/auth/admin/dashboard", icon: 'home'
+        },
+        {
+            label: "Appointments", href: "/auth/admin/appointments", icon: 'calendarDays'
+        },
+        {
+            label: "Reports", href: "/auth/admin/reports", icon: 'calendarDays'
         }
     ]
     return (

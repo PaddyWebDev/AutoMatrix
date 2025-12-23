@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { loginSchema } from '@/lib/validations/guest-route-forms'
 import { userType } from '@/types/common'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -58,6 +58,7 @@ export default function Login() {
                     loginForm.reset()
                     if (searchParam.get("role")) {
                         router.push("/auth/admin/dashboard")
+                        return;
                     }
 
                     switch (validatedFields.data.role) {
@@ -82,7 +83,7 @@ export default function Login() {
         })
     }
     return (
-        <section className='dark:bg-neutral-800 w-11/12 rounded-md bg-neutral-100 shadow-md flex items-center flex-col sm:w-[30rem]'>
+        <section className='dark:bg-neutral-800 w-11/12 rounded-md bg-neutral-100 shadow-md flex items-center flex-col sm:w-120'>
             <div>
                 <h1 className='text-3xl font-bold leading-tight tracking-tighter p-5'>Sign in to your account</h1>
             </div>

@@ -135,3 +135,17 @@ export const reportFilterSchema = z.object({
 });
 
 export type ReportFilter = z.infer<typeof reportFilterSchema>;
+
+// Zod schema for mechanic form
+
+export const createMechanicSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.email(),
+  phone: z.string().min(10, "Phone must be at least 10 characters"),
+  specialty: z.string().optional(),
+  experienceYears: z.string().regex(/^(?:[0-9]|[1-4][0-9]|50)$/, {
+    message: "Experience must be a number between 0 and 50",
+  }),
+});
+
+export type CreateMechanicFormData = z.infer<typeof createMechanicSchema>;

@@ -20,6 +20,7 @@ async function dynamicWhereClause(
       status: true,
       requestedDate: true,
       actualCompletionDate: true,
+      userUrgency: true,
       slaDeadline: true,
       Vehicle: {
         select: {

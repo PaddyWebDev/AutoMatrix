@@ -130,7 +130,7 @@ export default function BookAppointmentPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Select Nearest Service Center</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} >
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending} >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Choose nearest service center" />
@@ -158,7 +158,7 @@ export default function BookAppointmentPage() {
                   <FormItem>
                     <FormLabel>Service Type</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Oil Change, Brake Repair" {...field} />
+                      <Input placeholder="e.g., Oil Change, Brake Repair" disabled={isPending} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

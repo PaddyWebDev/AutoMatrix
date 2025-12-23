@@ -23,6 +23,8 @@ export default async function ServiceCenterLayout({ children }: { children: Reac
             label: "Inventory", href: "/auth/service-center/inventory", icon: "boxes"
         }, {
             label: "Invoices", href: "/auth/service-center/invoices", icon: "receipt"
+        }, {
+            label: "Mechanics", href: "/auth/service-center/mechanics", icon: "wrench"
         }
     ]
 

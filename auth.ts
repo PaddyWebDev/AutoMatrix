@@ -47,7 +47,6 @@ export const {
   },
   callbacks: {
     async signIn({ user }) {
-      console.log(user);
       if (!user) return false;
       return true;
     },

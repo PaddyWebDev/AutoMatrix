@@ -13,7 +13,7 @@ export async function GET() {
       stats: data,
       message: "Success",
     });
-  } catch (error) {
+  } catch {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

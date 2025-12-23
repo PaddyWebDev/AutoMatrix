@@ -13,6 +13,7 @@ import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import NewJobCard from "@/components/service-center/new-job-card";
 import DeleteJobCard from "@/components/service-center/delete-job-card";
+import AssignMechanic from "@/components/service-center/assign-mechanic";
 import { format } from "date-fns";
 import AddPartsToJobCard from "@/components/service-center/add-parts-job-card";
 import { useSessionContext } from "@/context/session";
@@ -156,9 +157,13 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
               </Button>
             )}
             {appointment.status === 'InService' && (
-              <Button disabled={isPending} onClick={() => updateAppointmentStatus('COMPLETED')}>
-                {isPending ? "Updating..." : "Complete Service"}
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button disabled={isPending} onClick={() => updateAppointmentStatus('COMPLETED')}>
+                  {isPending ? "Updating..." : "Complete Service"}
+                </Button>
+
+                <AssignMechanic skipMechanicIds={appointment.MechanicAssignment} appointmentId={id} alreadyAssigned={!!appointment.MechanicAssignment[0]?.mechanic.name} />
+              </div>
             )}
 
             {
@@ -175,6 +180,17 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
               )
             }
           </div>
+
+          <div className="mt-5">
+            <h1 className="text-xl font-bold">Mechanics Assigned </h1>
+            {
+              appointment.MechanicAssignment.map((mechanicAssign, index: number) => (
+                <h1 key={index}>
+                  {mechanicAssign.mechanic.name}
+                </h1>
+              ))
+            }
+          </div>
         </CardContent>
       </Card>
 
@@ -187,7 +203,12 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
         </CardHeader>
         <CardContent className="flex flex-col ">
           <div className="mb-4">
-            <NewJobCard appointmentId={id as string} disabledStatus={appointment.status === "COMPLETED"} />
+
+            {["InService", "COMPLETED"].includes(appointment.status)
+              && (
+                <NewJobCard appointmentId={id as string} disabledStatus={appointment.status === "COMPLETED"} />
+              )
+            }
             {appointment.status === "COMPLETED" && !appointment?.Invoice && (
               <GenerateInvoice appointmentId={id as string} totalAmount={totalCost} disabledStatus={!!appointment.Invoice} />
             )}
@@ -214,10 +235,10 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
                       {jobCard.JobCardParts?.length === 0 ? (
                         <p className="text-xs text-gray-500">No parts added</p>
                       ) : (
-                        <div className="space-y-1">
+                        <div className="space-y-1 ">
                           {jobCard.JobCardParts && jobCard.JobCardParts.map((part, index: number) => (
                             <div key={index} className="text-xs flex justify-between">
-                              <span>{part.partUsed.name} (x{part.quantity})</span>
+                              <span>{part.partUsed.name} ({part.quantity})</span>
                               <span>₹ {(part.partUsed.unitPrice * part.quantity).toFixed(2)}</span>
                             </div>
                           ))}

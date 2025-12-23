@@ -8,11 +8,22 @@ import {
     DialogContent, DialogDescription
 } from '../ui/dialog'
 import { Button } from '../ui/button'
-import { bookingStatus } from '@prisma/client'
+import { bookingStatus, AppointmentPriority } from '@prisma/client'
 import axios from 'axios'
 import queryClient from '@/lib/tanstack-query'
 import { AppointmentServiceCenter } from '@/types/service-center'
 import toast from 'react-hot-toast'
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const approvalSchema = z.object({
+    priority: z.enum([AppointmentPriority.LOW, AppointmentPriority.MEDIUM, AppointmentPriority.HIGH]),
+});
+
+type ApprovalForm = z.infer<typeof approvalSchema>;
 
 type AppointmentStatusProps = {
     appointmentId: string
@@ -26,11 +37,17 @@ export default function AppointmentStatus({
     const [isPending, startTransition] = React.useTransition()
     const isApproval = status === 'APPROVED'
 
+    const form = useForm<ApprovalForm>({
+        resolver: zodResolver(approvalSchema),
+        defaultValues: {
+            priority: AppointmentPriority.MEDIUM,
+        },
+    });
 
-    async function updateAppointmentStatus(updatedStatus: string) {
+    async function updateAppointmentStatus(updatedStatus: string, priority?: AppointmentPriority) {
         startTransition(async () => {
             try {
-                const response = await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/status/update`, { status: updatedStatus })
+                const response = await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/status/update`, { status: updatedStatus, priority })
                 queryClient.setQueryData(["appointments-service-center", appointmentId], function (prevData: AppointmentServiceCenter[] = []): AppointmentServiceCenter[] {
                     if (!prevData) return prevData
 
@@ -73,11 +90,39 @@ export default function AppointmentStatus({
 
                     <DialogDescription>
                         {isApproval
-                            ? 'Are you sure you want to approve this appointment? Once approved, the customer will be notified and the slot will be locked.'
+                            ? 'Select priority and confirm approval. This will create a triage record and may auto-assign a mechanic if only one is available.'
                             : 'Are you sure you want to reject this appointment? This action cannot be undone and the customer will be notified.'}
 
                     </DialogDescription>
                 </DialogHeader>
+
+                {isApproval && (
+                    <Form {...form}>
+                        <form className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="priority"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Priority</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select priority" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value={AppointmentPriority.LOW}>Low</SelectItem>
+                                                <SelectItem value={AppointmentPriority.MEDIUM}>Medium</SelectItem>
+                                                <SelectItem value={AppointmentPriority.HIGH}>High</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormItem>
+                                )}
+                            />
+                        </form>
+                    </Form>
+                )}
 
                 <DialogFooter className="gap-2">
                     <Button variant="outline" disabled={isPending}>
@@ -87,7 +132,14 @@ export default function AppointmentStatus({
                     <Button
                         disabled={isPending}
                         variant={isApproval ? 'default' : 'destructive'}
-                        onClick={async () => await updateAppointmentStatus(status)}
+                        onClick={async () => {
+                            if (isApproval) {
+                                const priority = form.getValues('priority');
+                                await updateAppointmentStatus(status, priority);
+                            } else {
+                                await updateAppointmentStatus(status);
+                            }
+                        }}
                     >
                         {isApproval ? 'Confirm Approval' : 'Confirm Rejection'}
                     </Button>

@@ -1,4 +1,4 @@
-import { bookingStatus } from "@prisma/client";
+import { AppointmentPriority, bookingStatus } from "@prisma/client";
 
 export type AppointmentServiceCenter = {
   id: string;
@@ -12,6 +12,13 @@ export type AppointmentServiceCenter = {
     vehicleMake: string;
     vehicleModel: number;
   };
+  MechanicAssignment: Array<{
+    mechanicId: string;
+    mechanic: {
+      name: string;
+    };
+  }>;
+
   owner: {
     email: string;
     name: string;
@@ -64,3 +71,31 @@ export type AppointmentServiceCenterDashboard = {
     name: string;
   };
 }[];
+
+export type Mechanic = {
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  speciality: string;
+  status: string;
+};
+
+export interface ServiceCenterAppointment {
+  id: string;
+  serviceType: string;
+  status: string;
+  requestedDate: string;
+  actualCompletionDate?: string;
+  userUrgency: AppointmentPriority;
+  slaDeadline?: string;
+  Vehicle: {
+    vehicleName: string;
+    vehicleMake: string;
+    vehicleModel: string;
+  };
+  owner: {
+    name: string;
+    email: string;
+  };
+}

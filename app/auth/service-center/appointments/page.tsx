@@ -22,35 +22,19 @@ import { decryptSocketData } from "@/hooks/cryptr";
 import queryClient from "@/lib/tanstack-query";
 import AppointmentStatus from "@/components/service-center/status-appointment";
 import { bookingStatus } from "@prisma/client";
+import { ServiceCenterAppointment } from "@/types/service-center";
 
 const filterSchema = z.object({
     status: z.string().optional(),
-    serviceType: z.string().optional(),
+    priority: z.string().optional(),
 });
 
 type FilterForm = z.infer<typeof filterSchema>;
 
-interface Appointment {
-    id: string;
-    serviceType: string;
-    status: string;
-    requestedDate: string;
-    actualCompletionDate?: string;
-    slaDeadline?: string;
-    Vehicle: {
-        vehicleName: string;
-        vehicleMake: string;
-        vehicleModel: string;
-    };
-    owner: {
-        name: string;
-        email: string;
-    };
-}
 
 interface AppointmentsResponse {
     success: boolean;
-    appointments: Appointment[];
+    appointments: ServiceCenterAppointment[];
     totalCount: number;
     page: number;
     limit: number;
@@ -65,20 +49,20 @@ export default function AppointmentsPage() {
         resolver: zodResolver(filterSchema),
         defaultValues: {
             status: "",
-            serviceType: "",
+            priority: "",
         },
     });
 
     const filters = form.watch();
 
-    const { data, isLoading, isError } = useQuery<AppointmentsResponse>({
+    const { data, isLoading, isError, isFetching, isFetched } = useQuery<AppointmentsResponse>({
         queryKey: ["appointments-service-center", currentPage, filters],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
             });
             if (filters.status) params.append("status", filters.status);
-            if (filters.serviceType) params.append("serviceType", filters.serviceType);
+            if (filters.priority) params.append("priority", filters.priority);
             const response = await axios.get(`/api/service-centers/appointments?${params}&userId=${session?.user.id}`);
             return response.data;
         },
@@ -94,8 +78,8 @@ export default function AppointmentsPage() {
         console.log(values);
     };
     React.useEffect(() => {
-        async function newAppointment(newAppt: Appointment) {
-            queryClient.setQueryData(['appointments-service-center'], function (prevData: Appointment[] = []) {
+        async function newAppointment(newAppt: ServiceCenterAppointment) {
+            queryClient.setQueryData(['appointments-service-center'], function (prevData: ServiceCenterAppointment[] = []) {
                 return [...prevData, newAppt]
             })
         }
@@ -108,10 +92,16 @@ export default function AppointmentsPage() {
             socket.off(`new-appointment-${session?.user.id}`)
         }
     }, [session?.user.id]);
-    if (isError) {
+
+
+    if (isError || (isFetched && !data?.appointments) || isFetched && !data?.appointments.length) {
         return <TanstackError />;
     }
+/*
+    the things here need to get done are add the deadline let the serivce center person view the deadline for this apointment
+    and update the deadline according
 
+*/
 
 
 
@@ -146,21 +136,20 @@ export default function AppointmentsPage() {
                     />
                     <FormField
                         control={form.control}
-                        name="serviceType"
+                        name="priority"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Service Type</FormLabel>
+                                <FormLabel>Priority</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                         <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="All Types" />
+                                            <SelectValue placeholder="All Priorities" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="OIL_CHANGE">Oil Change</SelectItem>
-                                        <SelectItem value="TIRE_REPLACEMENT">Tire Replacement</SelectItem>
-                                        <SelectItem value="BRAKE_REPAIR">Brake Repair</SelectItem>
-                                        <SelectItem value="ENGINE_TUNE_UP">Engine Tune Up</SelectItem>
+                                        <SelectItem value="LOW">Low</SelectItem>
+                                        <SelectItem value="MEDIUM">Medium</SelectItem>
+                                        <SelectItem value="HIGH">High</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </FormItem>
@@ -172,7 +161,7 @@ export default function AppointmentsPage() {
                 </form>
             </Form>
 
-            {isLoading ? (
+            {isLoading || isFetching ? (
                 <div className="space-y-4">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <Skeleton key={i} className="h-12 w-full" />
@@ -184,9 +173,10 @@ export default function AppointmentsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Service Type</TableHead>
-                                    <TableHead>Vehicle</TableHead>
+                                    <TableHead>Priority</TableHead>
                                     <TableHead>Owner</TableHead>
+                                    <TableHead>Vehicle</TableHead>
+                                    <TableHead>Service Type</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Requested Date</TableHead>
                                     <TableHead>Actions</TableHead>
@@ -195,12 +185,15 @@ export default function AppointmentsPage() {
                             <TableBody>
                                 {data?.appointments.map((appointment) => (
                                     <TableRow key={appointment.id}>
-                                        <TableCell>{appointment.serviceType}</TableCell>
+                                        <TableCell>{appointment?.userUrgency || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            {appointment.owner.name} ({appointment.owner.email})
+                                        </TableCell>
                                         <TableCell>
                                             {appointment.Vehicle.vehicleName} - {appointment.Vehicle.vehicleMake} {appointment.Vehicle.vehicleModel}
                                         </TableCell>
                                         <TableCell>
-                                            {appointment.owner.name} ({appointment.owner.email})
+                                            {appointment.serviceType}
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={appointment.status === "COMPLETED" ? "default" : appointment.status === "REJECTED" ? "destructive" : "secondary"}>

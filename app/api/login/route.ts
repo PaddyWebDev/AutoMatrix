@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
     });
 
     return new NextResponse("Login Success", { status: 200 });
-  } catch (error) {
-    console.log(error);
+  } catch {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

@@ -18,6 +18,16 @@ export async function GET(request: NextRequest) {
         requestedDate: true,
         actualCompletionDate: true,
         slaDeadline: true,
+        MechanicAssignment: {
+          select: {
+            mechanicId: true,
+            mechanic: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
         Vehicle: {
           select: {
             vehicleName: true,
