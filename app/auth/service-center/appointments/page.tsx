@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,8 @@ import { decryptSocketData } from "@/hooks/cryptr";
 import queryClient from "@/lib/tanstack-query";
 import AppointmentStatus from "@/components/service-center/status-appointment";
 import { bookingStatus } from "@prisma/client";
-import { ServiceCenterAppointment } from "@/types/service-center";
+import { AppointmentServiceCenter } from "@/types/service-center";
+import { NoAppointmentData } from "@/components/service-center/no-appointment-data";
 
 const filterSchema = z.object({
     status: z.string().optional(),
@@ -34,7 +35,7 @@ type FilterForm = z.infer<typeof filterSchema>;
 
 interface AppointmentsResponse {
     success: boolean;
-    appointments: ServiceCenterAppointment[];
+    appointments: AppointmentServiceCenter[];
     totalCount: number;
     page: number;
     limit: number;
@@ -73,35 +74,92 @@ export default function AppointmentsPage() {
         setCurrentPage(page);
     };
 
-    const onSubmit = (values: FilterForm) => {
+    const onSubmit = () => {
         setCurrentPage(1); // Reset to first page on filter change
-        console.log(values);
     };
     React.useEffect(() => {
-        async function newAppointment(newAppt: ServiceCenterAppointment) {
-            queryClient.setQueryData(['appointments-service-center'], function (prevData: ServiceCenterAppointment[] = []) {
-                return [...prevData, newAppt]
-            })
+        async function newAppointment(newAppt: AppointmentServiceCenter) {
+            queryClient.setQueryData<AppointmentsResponse>(
+                ['appointments-service-center', currentPage, filters],
+                (prevData) => {
+                    if (!prevData) {
+                        return {
+                            success: true,
+                            appointments: [newAppt],
+                            totalCount: 1,
+                            page: 1,
+                            limit: 10, // default, adjust if needed
+                            totalPages: 1,
+                        };
+                    }
+
+                    // Avoid duplicates
+                    const exists = prevData.appointments.some(a => a.id === newAppt.id);
+                    if (exists) return prevData;
+
+                    return {
+                        ...prevData,
+                        appointments: [newAppt, ...prevData.appointments],
+                        totalCount: prevData.totalCount + 1,
+                        totalPages: Math.ceil((prevData.totalCount + 1) / prevData.limit),
+                    };
+                }
+            );
         }
+
+
+        async function updateAppointmentStatus(updatedAppointment: {
+            appointmentId: string;
+            status: string;
+        }) {
+            queryClient.setQueryData<AppointmentsResponse>(
+                ['appointments-service-center', currentPage, filters],
+                (prevData) => {
+                    if (!prevData) return prevData;
+
+                    return {
+                        ...prevData,
+                        appointments: prevData.appointments.map((a) =>
+                            a.id === updatedAppointment.appointmentId
+                                ? { ...a, status: updatedAppointment.status }
+                                : a
+                        ),
+                    };
+                }
+            );
+        }
+
         socket.connect();
         socket.on(`new-appointment-${session?.user.id}`, async (data) => {
             newAppointment(await decryptSocketData(data))
         });
 
+        socket.on(
+            `status-update-appointment-${session?.user.id}`, async (data: string) => {
+                updateAppointmentStatus(await decryptSocketData(data))
+            }
+        )
+
         return () => {
             socket.off(`new-appointment-${session?.user.id}`)
+            socket.off(`status-update-appointment-${session?.user.id}`)
         }
-    }, [session?.user.id]);
+    }, [session?.user.id, currentPage, filters]);
 
 
-    if (isError || (isFetched && !data?.appointments) || isFetched && !data?.appointments.length) {
+    if (data?.appointments.length === 0) {
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <NoAppointmentData />
+            </div>
+        )
+    }
+
+    if (isError || isFetched && !data?.appointments.length) {
         return <TanstackError />;
     }
-/*
-    the things here need to get done are add the deadline let the serivce center person view the deadline for this apointment
-    and update the deadline according
 
-*/
+
 
 
 
@@ -179,49 +237,63 @@ export default function AppointmentsPage() {
                                     <TableHead>Service Type</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Requested Date</TableHead>
+                                    <TableHead>Deadline</TableHead>
                                     <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {data?.appointments.map((appointment) => (
-                                    <TableRow key={appointment.id}>
-                                        <TableCell>{appointment?.userUrgency || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            {appointment.owner.name} ({appointment.owner.email})
-                                        </TableCell>
-                                        <TableCell>
-                                            {appointment.Vehicle.vehicleName} - {appointment.Vehicle.vehicleMake} {appointment.Vehicle.vehicleModel}
-                                        </TableCell>
-                                        <TableCell>
-                                            {appointment.serviceType}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={appointment.status === "COMPLETED" ? "default" : appointment.status === "REJECTED" ? "destructive" : "secondary"}>
-                                                {appointment.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>{format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}</TableCell>
-                                        <TableCell>
-                                            {
-                                                ([bookingStatus.APPROVED.toString(), bookingStatus.InService.toString(), bookingStatus.COMPLETED.toString()].includes(appointment.status)) && (
-                                                    <Link href={`/auth/service-center/appointments/${appointment.id}`}>
-                                                        <Button size="sm" variant="secondary" className="  cursor-pointer">
-                                                            View
-                                                        </Button>
-                                                    </Link>
-                                                )
-                                            }
-                                            {
-                                                appointment.status === "PENDING" && (
-                                                    <div className="flex items-center gap-2">
-                                                        <AppointmentStatus appointmentId={appointment.id} status="REJECTED" />
-                                                        <AppointmentStatus appointmentId={appointment.id} status="APPROVED" />
-                                                    </div>
-                                                )
-                                            }
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {data?.appointments.map((appointment) => {
+                                    const deadline = appointment.slaDeadline ? new Date(appointment.slaDeadline) : null;
+                                    const daysLeft = deadline ? differenceInDays(deadline, new Date()) : null;
+                                    let deadlineColor = "text-gray-500";
+                                    if (daysLeft !== null) {
+                                        if (daysLeft <= 1) deadlineColor = "text-red-500";
+                                        else if (daysLeft <= 3) deadlineColor = "text-yellow-500";
+                                        else deadlineColor = "text-green-500";
+                                    }
+                                    return (
+                                        <TableRow key={appointment.id}>
+                                            <TableCell>{appointment?.userUrgency || 'N/A'}</TableCell>
+                                            <TableCell>
+                                                {appointment.owner.name} ({appointment.owner.email})
+                                            </TableCell>
+                                            <TableCell>
+                                                {appointment.Vehicle.vehicleName} - {appointment.Vehicle.vehicleMake} {appointment.Vehicle.vehicleModel}
+                                            </TableCell>
+                                            <TableCell>
+                                                {appointment.serviceType}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={appointment.status === "COMPLETED" ? "default" : appointment.status === "REJECTED" ? "destructive" : "secondary"}>
+                                                    {appointment.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>{format(new Date(appointment.requestedDate), "dd MMM yyyy, hh:mm a")}</TableCell>
+                                            <TableCell className={deadlineColor}>
+                                                {deadline ? format(deadline, "dd MMM yyyy, hh:mm a") : "N/A"}
+                                            </TableCell>
+                                            <TableCell>
+                                                {
+                                                    ([bookingStatus.APPROVED.toString(), bookingStatus.InService.toString(), bookingStatus.COMPLETED.toString()].includes(appointment.status)) && (
+                                                        <Link href={`/auth/service-center/appointments/${appointment.id}`}>
+                                                            <Button size="sm" variant="secondary" className="  cursor-pointer">
+                                                                View
+                                                            </Button>
+                                                        </Link>
+                                                    )
+                                                }
+                                                {
+                                                    appointment.status === "PENDING" && (
+                                                        <div className="flex items-center gap-2">
+                                                            <AppointmentStatus appointmentId={appointment.id} status="REJECTED" />
+                                                            <AppointmentStatus appointmentId={appointment.id} status="APPROVED" />
+                                                        </div>
+                                                    )
+                                                }
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                             </TableBody>
                         </Table>
                     </div>

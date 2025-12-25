@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useVehicles, useServiceCenters } from "@/hooks/customer";
+import { useVehicles, useServiceCenters, handleFiledUpload } from "@/hooks/customer";
 import { useSessionContext } from "@/context/session";
 import { AppointmentPriority, Vehicle } from "@prisma/client";
 import Loader from "@/components/Loader";
@@ -31,6 +31,7 @@ import { createAppointmentSchema, createAppointmentSchemaType } from "@/lib/vali
 import React from "react";
 import { AppointmentDatePicker } from "@/components/AppointmentDatePicker";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 
@@ -50,6 +51,8 @@ export default function BookAppointmentPage() {
       serviceCenterId: "",
       priority: undefined,
       serviceDeadline: undefined,
+      isAccidental: false,
+      photos: undefined,
     },
   });
 
@@ -197,7 +200,7 @@ export default function BookAppointmentPage() {
                 name="serviceDeadline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Pick Service Date</FormLabel>
+                    <FormLabel>Service Deadline</FormLabel>
                     <FormControl>
                       <AppointmentDatePicker disabledStatus={isPending} value={field.value} onChange={field.onChange} />
                     </FormControl>
@@ -206,6 +209,46 @@ export default function BookAppointmentPage() {
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="isAccidental"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Is the car accidental?</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("isAccidental") && (
+                <FormField
+                  control={form.control}
+                  name="photos"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Upload Photos of the Car</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          disabled={isPending}
+                          onChange={(e) => handleFiledUpload(field, e)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <Button type="submit" disabled={isPending} className="flex-1">
                 {isPending ? "Booking..." : "Book Appointment"}

@@ -148,8 +148,8 @@ export async function GET(request: Request) {
     );
 
     return NextResponse.json({ reports });
-  } catch (error) {
-    console.error(error);
+  } catch {
+
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

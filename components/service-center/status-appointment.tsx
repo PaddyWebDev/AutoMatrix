@@ -10,8 +10,6 @@ import {
 import { Button } from '../ui/button'
 import { bookingStatus, AppointmentPriority } from '@prisma/client'
 import axios from 'axios'
-import queryClient from '@/lib/tanstack-query'
-import { AppointmentServiceCenter } from '@/types/service-center'
 import toast from 'react-hot-toast'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select'
@@ -48,19 +46,6 @@ export default function AppointmentStatus({
         startTransition(async () => {
             try {
                 const response = await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/status/update`, { status: updatedStatus, priority })
-                queryClient.setQueryData(["appointments-service-center", appointmentId], function (prevData: AppointmentServiceCenter[] = []): AppointmentServiceCenter[] {
-                    if (!prevData) return prevData
-
-                    return prevData.map((appointment) => (
-                        appointment.id === appointmentId ?
-                            {
-                                ...appointment,
-                                status
-                            }
-                            : appointment
-                    ))
-
-                })
                 toast.success(response.data)
             } catch (error) {
                 if (axios.isAxiosError(error)) {

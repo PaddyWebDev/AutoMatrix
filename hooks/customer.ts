@@ -1,5 +1,10 @@
+import {
+  AppointmentViewCustomerRoute,
+  CustomerInvoiceType,
+} from "@/types/customer";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { ControllerRenderProps } from "react-hook-form";
 import toast from "react-hot-toast";
 
 export const useVehicles = (userId?: string) => {
@@ -85,13 +90,64 @@ export function useServiceCentersFetchAll() {
 }
 
 export function useInvoices(userId: string) {
-  return useQuery({
-    queryKey: ["invoices-user"],
+  return useQuery<Array<CustomerInvoiceType>>({
+    queryKey: ["invoices-customer", userId],
     queryFn: async function () {
-      const response = await axios.get(
-        `/api/customer/invoices?userId=${userId}`
-      );
-      return response.data.invoice_data;
+      try {
+        const response = await axios.get(
+          `/api/customer/invoices?userId=${userId}`
+        );
+        return response.data.invoice_data;
+      } catch {
+        return [];
+      }
     },
+    enabled: !!userId,
+  });
+}
+
+export function useCustomerAppointments(appointmentId: string) {
+  return useQuery<AppointmentViewCustomerRoute>({
+    queryKey: ["customer-appointments", appointmentId],
+    enabled: !!appointmentId,
+    queryFn: async () => {
+      try {
+        const response = await axios.get(
+          `/api/customer/appointments/get?appointmentId=${appointmentId}`
+        );
+        return response.data.appointment_data;
+      } catch {
+        return [];
+      }
+    },
+  });
+}
+
+export function handleFiledUpload(
+  field: ControllerRenderProps<
+    {
+      vehicleId: string;
+      serviceType: string;
+      serviceCenterId: string;
+      serviceDeadline: Date;
+      priority: "LOW" | "MEDIUM" | "HIGH";
+      isAccidental: boolean;
+      photos?: string[] | undefined;
+    },
+    "photos"
+  >,
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+  const files = Array.from(e.target.files || []);
+  const promises = files.map((file) => {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  });
+  Promise.all(promises).then((base64Strings) => {
+    field.onChange(base64Strings);
   });
 }

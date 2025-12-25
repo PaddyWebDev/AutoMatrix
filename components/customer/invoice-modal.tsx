@@ -7,16 +7,23 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Download, Eye } from "lucide-react";
-import { customerInvoice } from "@/types/customer";
+import { CustomerInvoiceType } from "@/types/customer";
 import { format } from "date-fns";
 import { generateInvoicePdf } from "@/hooks/invoice";
 
+
+
+
+
 interface InvoiceModalProps {
-  invoice: customerInvoice;
+  invoice: CustomerInvoiceType;
 }
 
 export default function InvoiceModal({ invoice }: InvoiceModalProps) {
-    // Calculate total cost and labor charges (replicating logic from service center appointments page)
+
+
+
+  // Calculate total cost and labor charges (replicating logic from service center appointments page)
   const totalCost = invoice.appointment.JobCards.reduce(
     (sum, job) => sum + (job.price || 0), 0
   );
@@ -30,20 +37,20 @@ export default function InvoiceModal({ invoice }: InvoiceModalProps) {
     labourCharges += jobCard.price - partsCost;
   });
 
-
   const generatePDF = () => {
-    generateInvoicePdf(invoice, labourCharges, totalCost)
+    generateInvoicePdf(invoice, labourCharges, totalCost);
   };
 
+
   return (
-    <Dialog >
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-none   md:w-[60dvw] w-[90dvw] max-h-[80vh] overflow-y-auto" style={{
+      <DialogContent className="max-w-none md:w-[60dvw] w-[90dvw] max-h-[80vh] overflow-y-auto" style={{
         maxWidth: "none"
       }}>
         <DialogHeader>
@@ -136,8 +143,46 @@ export default function InvoiceModal({ invoice }: InvoiceModalProps) {
             </CardContent>
           </Card>
 
+          {/* Payment Details */}
+          {invoice.appointment?.Payment && (
+            <Card className="dark:bg-neutral-800 bg-neutral-100">
+              <CardHeader>
+                <CardTitle>Payment Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Payment Method</Label>
+                    <p>{invoice.appointment?.Payment.method}</p>
+                  </div>
+                  <div>
+                    <Label>Status</Label>
+                    <Badge variant={invoice.appointment?.Payment.status === "SUCCESS" ? "default" : "destructive"}>
+                      {invoice.appointment.Payment.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label>Amount Paid</Label>
+                    <p>₹{invoice.appointment.Payment.amount}</p>
+                  </div>
+                  <div>
+                    <Label>Paid At</Label>
+                    <p>{invoice.appointment.Payment.paidAt ? format(new Date(invoice.appointment.Payment.paidAt), "dd MMM yyyy, hh:mm a") : "N/A"}</p>
+                  </div>
+                </div>
+                {invoice.appointment.Payment.transactionId && (
+                  <div>
+                    <Label>Transaction ID</Label>
+                    <p className="text-sm">{invoice.appointment.Payment.transactionId}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Actions */}
           <div className="flex justify-end space-x-2">
+
             <Button onClick={generatePDF}>
               <Download className="mr-2 h-4 w-4" />
               Download PDF

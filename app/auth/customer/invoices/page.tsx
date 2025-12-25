@@ -11,8 +11,10 @@ import { useEffect } from "react";
 import socket from "@/lib/socket-io";
 import queryClient from "@/lib/tanstack-query";
 import { decryptSocketData } from "@/hooks/cryptr";
-import { customerInvoice } from "@/types/customer";
 import InvoiceModal from "@/components/customer/invoice-modal";
+import PaymentModal from "@/components/customer/payment-modal";
+import { InvoiceStatus } from "@prisma/client";
+import { CustomerInvoiceType } from "@/types/customer";
 
 export default function CustomerInvoices() {
   const { session } = useSessionContext();
@@ -24,14 +26,12 @@ export default function CustomerInvoices() {
     const channel = `new-invoice-${session.user.id}`;
 
     const handleNewInvoice = async (encryptedData: string) => {
-      try {
-        const invoiceData = await decryptSocketData(encryptedData);
-        console.log(invoiceData);
-        // Invalidate and refetch invoices query
-        queryClient.invalidateQueries({ queryKey: ["invoices", session.user.id] });
-      } catch (error) {
-        console.error("Error handling new invoice notification:", error);
-      }
+      const invoiceData: CustomerInvoiceType = await decryptSocketData(encryptedData);
+
+      queryClient.setQueryData(["invoices-customer", session?.user?.id], function (prevData: CustomerInvoiceType[] = []): CustomerInvoiceType[] {
+        if (!prevData) return prevData;
+        return [...prevData, invoiceData]
+      })
     };
 
     socket.on(channel, handleNewInvoice);
@@ -49,11 +49,12 @@ export default function CustomerInvoices() {
     return <TanstackError />;
   }
 
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-3xl font-bold">My Invoices</h1>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {invoices.map((invoice: customerInvoice, index: number) => (
+        {invoices.map((invoice, index: number) => (
           <Card key={index} className="dark:bg-neutral-800 bg-neutral-100 shadow-md">
             <CardHeader>
               <CardTitle className="text-xl font-bold text-center">Invoice #{invoice.invoiceNumber}</CardTitle>
@@ -62,7 +63,14 @@ export default function CustomerInvoices() {
               <p><strong>Amount:</strong> ₹{invoice.totalAmount}</p>
               <p><strong>Status:</strong> <Badge variant={invoice.status === "PAID" ? "default" : "destructive"}>{invoice.status === "SENT" ? "NOT_PAID" : invoice.status}</Badge></p>
               <p><strong>Created:</strong> {format(new Date(invoice.billingDate), "dd MMM yyyy, hh:mm a")}</p>
-              <InvoiceModal invoice={invoice} />
+              <div className="flex items-center gap-3">
+                <InvoiceModal invoice={invoice} />
+                {
+                  invoice.status !== InvoiceStatus.PAID && (
+                    <PaymentModal appointmentId={invoice.appointmentId} invoiceId={invoice.id} amount={invoice.totalAmount} userId={invoice.appointment.userId} />
+                  )
+                }
+              </div>
             </CardContent>
           </Card>
         ))}

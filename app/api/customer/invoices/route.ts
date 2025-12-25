@@ -24,6 +24,15 @@ export async function GET(request: NextRequest) {
         appointmentId: true,
         appointment: {
           select: {
+            Payment: {
+              select: {
+                status: true,
+                method: true,
+                amount: true,
+                paidAt: true,
+                transactionId: true,
+              },
+            },
             Vehicle: {
               select: {
                 vehicleName: true,
@@ -49,6 +58,7 @@ export async function GET(request: NextRequest) {
             JobCards: {
               select: {
                 jobName: true,
+                jobDescription:true,
                 JobCardParts: {
                   select: {
                     quantity: true,

@@ -12,11 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import CreateMechanic from "@/components/service-center/create-mechanic";
-import { Mechanic } from "@/types/service-center";
 import socket from "@/lib/socket-io";
 import queryClient from "@/lib/tanstack-query";
 import { decryptSocketData } from "@/hooks/cryptr";
 import { DeleteMechanicDialog } from "@/components/service-center/delete-mechanic";
+import { Mechanic } from "@prisma/client";
 
 
 export default function MechanicsPage() {

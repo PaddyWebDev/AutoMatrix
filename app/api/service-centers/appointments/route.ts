@@ -1,5 +1,5 @@
 import prisma from "@/lib/db";
-import { bookingStatus, Prisma } from "@prisma/client";
+import { AppointmentPriority, bookingStatus, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 async function dynamicWhereClause(
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const limit = 20;
     const skip = (page - 1) * limit;
     const status = searchParams.get("status");
-    const serviceType = searchParams.get("serviceType");
+    const priority = searchParams.get("priority");
 
     let appointments;
     if (status) {
@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
         limit,
         skip
       );
-    } else if (serviceType) {
+    } else if (priority) {
       appointments = await dynamicWhereClause(
         {
-          serviceType,
+          userUrgency: priority as AppointmentPriority,
         },
         limit,
         skip
@@ -91,8 +91,7 @@ export async function GET(request: NextRequest) {
       limit,
       totalPages,
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

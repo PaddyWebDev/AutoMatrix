@@ -17,15 +17,13 @@ export async function GET(request: NextRequest) {
         status: true,
         requestedDate: true,
         actualCompletionDate: true,
+        isAccidental: true,
+        photos: true,
         slaDeadline: true,
-        MechanicAssignment: {
+        Mechanic: {
           select: {
-            mechanicId: true,
-            mechanic: {
-              select: {
-                name: true,
-              },
-            },
+            id: true,
+            name: true,
           },
         },
         Vehicle: {
@@ -68,6 +66,7 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+
     return NextResponse.json(
       {
         message: "Success",

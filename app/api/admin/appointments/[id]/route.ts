@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
+function serializeBigInt<T>(data: T): T {
+  return JSON.parse(
+    JSON.stringify(data, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value
+    )
+  );
+}
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -33,9 +40,8 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(appointment);
-  } catch (error) {
-    console.error("Error fetching appointment:", error);
+    return NextResponse.json(serializeBigInt(appointment));
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch appointment" },
       { status: 500 }

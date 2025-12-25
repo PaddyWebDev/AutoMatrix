@@ -79,7 +79,7 @@ export function useEscalateAppointment() {
 }
 
 
-export function useAppointments(page: number = 1, limit: number = 10, search: string = "") {
+export function useAppointmentsAdmin(page: number = 1, limit: number = 10, search: string = "") {
   return useQuery<AppointmentsResponseAdmin>({
     queryKey: ["admin-appointments", page, limit, search],
     queryFn: async () => {
@@ -95,7 +95,7 @@ export function useAppointments(page: number = 1, limit: number = 10, search: st
   });
 }
 
-export function useAppointmentDetails(id: string) {
+export function useAppointmentDetailsAdmin(id: string) {
   return useQuery<AppointmentAdmin>({
     queryKey: ["admin-appointment", id],
     queryFn: async () => {

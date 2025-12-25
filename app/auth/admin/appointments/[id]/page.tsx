@@ -1,14 +1,14 @@
 "use client"
 import React from 'react';
-import { useAppointmentDetails } from '@/hooks/admin';
+import { useAppointmentDetailsAdmin } from '@/hooks/admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 import { useParams, useRouter } from 'next/navigation';
+import TanstackError from '@/components/TanstackError';
 
 
 
@@ -18,9 +18,9 @@ export default function AppointmentDetailPage() {
   if (!id) {
     router.push("/auth/admin/dashboard")
   }
-  const { data: appointment, isLoading, error } = useAppointmentDetails(id as string);
+  const { data: appointment, isLoading, isFetching, error } = useAppointmentDetailsAdmin(id as string);
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <div className="container mx-auto p-6 space-y-6">
         <Skeleton className="h-8 w-64" />
@@ -33,19 +33,8 @@ export default function AppointmentDetailPage() {
   }
 
   if (error || !appointment) {
-    toast.error('Failed to load appointment details');
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <p className="text-red-500 mb-4">Failed to load appointment details</p>
-          <Link href="/auth/admin/appointments">
-            <Button>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Appointments
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <TanstackError />
     );
   }
 
@@ -81,8 +70,8 @@ export default function AppointmentDetailPage() {
             </div>
             <div>
               <label className="text-sm font-medium">Priority</label>
-              <Badge variant={appointment.priority === 'HIGH' ? 'destructive' : 'secondary'}>
-                {appointment.priority}
+              <Badge variant={appointment.userUrgency === 'HIGH' ? 'destructive' : 'secondary'}>
+                {appointment.userUrgency}
               </Badge>
             </div>
             <div>

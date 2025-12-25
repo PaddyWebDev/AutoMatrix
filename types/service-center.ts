@@ -1,101 +1,110 @@
-import { AppointmentPriority, bookingStatus } from "@prisma/client";
-
-export type AppointmentServiceCenter = {
+export interface AppointmentServiceCenter {
   id: string;
-  status: bookingStatus;
   serviceType: string;
-  requestedDate: Date;
-  slaDeadline: Date | null;
-  actualCompletionDate: Date | null;
+  status: string;
+  userUrgency: string;
+  requestedDate: string;
+  slaDeadline: string | null;
+  actualCompletionDate: string | null;
+  slaBreached: boolean;
+  isAccidental: boolean;
+  photos: string[];
   Vehicle: {
     vehicleName: string;
     vehicleMake: string;
     vehicleModel: number;
   };
-  MechanicAssignment: Array<{
-    mechanicId: string;
-    mechanic: {
-      name: string;
-    };
-  }>;
-
   owner: {
-    email: string;
     name: string;
+    email: string;
   };
-  Invoice: {
-    billingDate: true;
-  };
-  JobCards: Array<{
+  JobCards: {
     id: string;
     jobName: string;
-    price: number;
     jobDescription: string;
+    price: number;
     JobCardParts: {
-      partId: string;
       quantity: number;
       partUsed: {
         name: string;
         unitPrice: number;
       };
     }[];
-  }>;
-};
+  }[];
+  Mechanic: {
+    mechanicId: string;
+    name: string;
+  }[];
+  Invoice?: {
+    id: string;
+    invoiceNumber: string;
+    totalAmount: number;
+    billingDate: string;
+    dueDate: string;
+    status: string;
+  };
+}
 
-export const categories: Array<{
-  label: string;
-  value: string;
-}> = [
-  { label: "Engine Parts", value: "ENGINE_PARTS" },
-  { label: "Electrical", value: "ELECTRICAL" },
-  { label: "Brake System", value: "BRAKE_SYSTEM" },
-  { label: "Suspension", value: "SUSPENSION" },
-  { label: "Fluids", value: "FLUIDS" },
-  { label: "Tools", value: "TOOLS" },
-  { label: "Body Parts", value: "BODY_PARTS" },
-  { label: "Accessories", value: "ACCESSORIES" },
-  { label: "Misc", value: "MISC" },
-];
-
-export type AppointmentServiceCenterDashboard = {
+export interface ServiceCenterAppointmentView {
   id: string;
-  status: bookingStatus;
   serviceType: string;
+  status: string;
+  userUrgency: string;
+  requestedDate: string;
+  slaDeadline: string | null;
+  actualCompletionDate: string | null;
+  slaBreached: boolean;
   Vehicle: {
     vehicleName: string;
     vehicleMake: string;
     vehicleModel: number;
   };
-  requestedDate: Date;
-  owner: {
-    name: string;
-  };
-}[];
-
-export type Mechanic = {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  speciality: string;
-  status: string;
-};
-
-export interface ServiceCenterAppointment {
-  id: string;
-  serviceType: string;
-  status: string;
-  requestedDate: string;
-  actualCompletionDate?: string;
-  userUrgency: AppointmentPriority;
-  slaDeadline?: string;
-  Vehicle: {
-    vehicleName: string;
-    vehicleMake: string;
-    vehicleModel: string;
-  };
   owner: {
     name: string;
     email: string;
   };
+  JobCards: {
+    id: string;
+    jobName: string;
+    jobDescription: string;
+    price: number;
+    JobCardParts: {
+      quantity: number;
+      partUsed: {
+        name: string;
+        unitPrice: number;
+      };
+    }[];
+  }[];
+  MechanicAssignment: {
+    mechanic: {
+      name: string;
+    };
+  }[];
+  Invoice?: {
+    id: string;
+    invoiceNumber: string;
+    totalAmount: number;
+    billingDate: string;
+    dueDate: string;
+    status: string;
+  };
+  isAccidental: boolean;
+  photos: string[];
+}
+
+export interface AppointmentServiceCenterDashboard {
+  id: string;
+  serviceType: string;
+  status: string;
+  Vehicle: {
+    vehicleMake: string;
+    vehicleModel: string;
+    vehicleName: string;
+  };
+  owner: {
+    name: string;
+  };
+
+  requestedDate: Date;
 }

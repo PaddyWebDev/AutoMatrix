@@ -33,12 +33,21 @@ export default function GenerateInvoice({ appointmentId, totalAmount, disabledSt
                 queryClient.setQueryData(["appointment-service-center", appointmentId], function (prevData: AppointmentServiceCenter): AppointmentServiceCenter {
                     if (!prevData) return prevData;
 
-                    return {
-                        ...prevData,
-                        Invoice: {
-                            billingDate: response.data.billing_date
+                    if (prevData.Invoice) {
+                        return {
+                            ...prevData,
+                            Invoice: {
+                                ...prevData?.Invoice,
+                                billingDate: response.data.billing_date as string
+                            }
+                        }
+                    } else {
+                        return {
+                            ...prevData
                         }
                     }
+
+
                 })
                 toast.success(response.data.message);
 

@@ -1,9 +1,9 @@
-import { customerInvoice } from "@/types/customer";
+import { CustomerInvoiceType } from "@/types/customer";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 
 export function generateInvoicePdf(
-  invoice: customerInvoice,
+  invoice: CustomerInvoiceType,
   labourCharges: number,
   totalCost: number
 ) {

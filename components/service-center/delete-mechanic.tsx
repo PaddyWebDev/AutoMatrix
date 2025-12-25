@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { Mechanic } from "@/types/service-center";
+import { Mechanic } from "@prisma/client";
 
 type DeleteMechanicDialogProps = {
     mechanicId: string;
@@ -33,7 +33,6 @@ export function DeleteMechanicDialog({
         onSuccess: () => {
             queryClient.setQueryData(["service-center-mechanic", serviceCenterId], function (prevData: Mechanic[] = []): Mechanic[] {
                 if (!prevData) return prevData;
-                console.log(prevData);
                 const delted = prevData.filter((mechanic) => mechanic.id !== mechanicId)
                 return delted;
             })

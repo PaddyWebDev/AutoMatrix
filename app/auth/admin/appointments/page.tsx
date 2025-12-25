@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useAppointments } from '@/hooks/admin';
+import { useAppointmentsAdmin } from '@/hooks/admin';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
-import toast from 'react-hot-toast';
+import TanstackError from '@/components/TanstackError';
 
 const searchSchema = z.object({
   search: z.string().optional(),
@@ -27,7 +27,7 @@ export default function AppointmentsPage() {
   const [search, setSearch] = useState("");
   const limit = 10;
 
-  const { data, isLoading, error } = useAppointments(page, limit, search);
+  const { data, isLoading, isError, isFetching } = useAppointmentsAdmin(page, limit, search);
 
   const form = useForm<SearchForm>({
     resolver: zodResolver(searchSchema),
@@ -45,9 +45,10 @@ export default function AppointmentsPage() {
     setPage(newPage);
   };
 
-  if (error) {
-    toast.error('Failed to load appointments');
+  if (isError || !isFetching && !data?.appointment_data || !isFetching && data?.appointment_data.length === undefined) {
+    <TanstackError />
   }
+
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -120,7 +121,7 @@ export default function AppointmentsPage() {
                 <TableBody>
                   {data?.appointment_data.map((appointment) => (
                     <TableRow key={appointment.id}>
-                
+
                       <TableCell>
                         <div>
                           <p className="font-medium">{appointment.owner.name}</p>
@@ -141,9 +142,9 @@ export default function AppointmentsPage() {
                         <Badge
                           variant={
                             appointment.status === 'COMPLETED' ? 'default' :
-                            appointment.status === 'PENDING' ? 'secondary' :
-                            appointment.status === 'APPROVED' ? 'outline' :
-                            'destructive'
+                              appointment.status === 'PENDING' ? 'secondary' :
+                                appointment.status === 'APPROVED' ? 'outline' :
+                                  'destructive'
                           }
                         >
                           {appointment.status}
@@ -152,12 +153,12 @@ export default function AppointmentsPage() {
                       <TableCell>
                         <Badge
                           variant={
-                            appointment.priority === 'HIGH' ? 'destructive' :
-                            appointment.priority === 'MEDIUM' ? 'default' :
-                            'secondary'
+                            appointment.userUrgency === 'HIGH' ? 'destructive' :
+                              appointment.userUrgency === 'MEDIUM' ? 'default' :
+                                'secondary'
                           }
                         >
-                          {appointment.priority}
+                          {appointment.userUrgency}
                         </Badge>
                       </TableCell>
                       <TableCell>

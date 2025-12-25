@@ -24,6 +24,8 @@ import { bookingStatus } from "@prisma/client";
 import GenerateInvoice from "@/components/service-center/generate-invoice";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { Session } from "next-auth";
+import Image from "next/image";
+import { NoAppointmentData } from "@/components/service-center/no-appointment-data";
 
 
 export default function AppointmentDetailPage() {
@@ -41,9 +43,19 @@ export default function AppointmentDetailPage() {
     )
   }
 
-  if (isError || !appointment) {
+  if (isError || appointment === undefined) {
     return (
       <TanstackError />
+    )
+  }
+
+  console.log(appointment.Mechanic);
+
+  if (appointment === null) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <NoAppointmentData />
+      </div>
     )
   }
 
@@ -150,6 +162,24 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
             )}
           </div>
 
+          {appointment.isAccidental && (
+            <div className="mb-4">
+              <Label>Accidental Photos</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {appointment.photos.map((photo, index) => (
+                  <Image
+                    key={index}
+                    src={photo}
+                    width={500}
+                    height={500}
+                    alt={`Accidental photo ${index + 1}`}
+                    className="w-24 h-24 object-cover rounded border"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex space-x-2">
             {appointment.status === 'APPROVED' && (
               <Button disabled={isPending} onClick={() => updateAppointmentStatus('InService')}>
@@ -162,13 +192,12 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
                   {isPending ? "Updating..." : "Complete Service"}
                 </Button>
 
-                <AssignMechanic skipMechanicIds={appointment.MechanicAssignment} appointmentId={id} alreadyAssigned={!!appointment.MechanicAssignment[0]?.mechanic.name} />
+                <AssignMechanic skipMechanicIds={appointment.Mechanic} appointmentId={id} alreadyAssigned={!!appointment.Mechanic[0]?.name} />
               </div>
             )}
-
             {
               appointment.status === "COMPLETED" && (
-                appointment.slaDeadline && appointment?.slaDeadline > new Date() ? (
+                appointment.slaDeadline && new Date(appointment?.slaDeadline) < new Date() ? (
                   <h1 className="text-2xl font-bold text-red-500">
                     You Failed to Achieve the deadline
                   </h1>
@@ -184,9 +213,9 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
           <div className="mt-5">
             <h1 className="text-xl font-bold">Mechanics Assigned </h1>
             {
-              appointment.MechanicAssignment.map((mechanicAssign, index: number) => (
+              appointment.Mechanic.map((mechanicAssign, index: number) => (
                 <h1 key={index}>
-                  {mechanicAssign.mechanic.name}
+                  {mechanicAssign.name}
                 </h1>
               ))
             }

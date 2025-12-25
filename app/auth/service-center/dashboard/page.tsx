@@ -10,8 +10,9 @@ import axios from "axios";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { format } from "date-fns";
-import { AppointmentServiceCenterDashboard } from "@/types/service-center";
+// import { AppointmentServiceCenterDashboard } from "@/types/service-center";
 import { Badge } from "@/components/ui/badge";
+import { AppointmentServiceCenterDashboard } from "@/types/service-center";
 
 
 
@@ -20,7 +21,7 @@ export default function ServiceCenterDashboard() {
 
 
 
-  const { data: appointments, isLoading, isError, isFetching } = useQuery<AppointmentServiceCenterDashboard>({
+  const { data: appointments, isLoading, isError, isFetching } = useQuery<AppointmentServiceCenterDashboard[]>({
     queryKey: ['appointments', session?.user.id],
     queryFn: async () => {
       const response = await axios.get("/api/service-centers/appointments/dashboard")
@@ -92,15 +93,6 @@ export default function ServiceCenterDashboard() {
                   <Badge variant={appointment.status === 'PENDING' ? 'secondary' : appointment.status === "COMPLETED" ? 'default' : 'outline'}>
                     {appointment.status}
                   </Badge>
-                  {appointment.status === 'PENDING' && (
-                    <div className="space-x-2">
-                      <Button size="sm" variant="outline"
-                      // onClick={() => updateAppointmentStatus(appointment.id, 'COMPLETED')}
-                      >
-                        Complete
-                      </Button>
-                    </div>
-                  )}
                 </div>
               </Link>
             ))}

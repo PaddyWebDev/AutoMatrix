@@ -15,7 +15,6 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { categories } from '@/types/service-center';
 import axios from 'axios';
 import queryClient from '@/lib/tanstack-query';
 import { Inventory } from '@prisma/client';
@@ -137,11 +136,19 @@ export default function CreateInventoryItem({ serviceCenterId }: { serviceCenter
                                             </SelectTrigger>
 
                                             <SelectContent>
-                                                {categories.map((cat) => (
-                                                    <SelectItem key={cat.value} value={cat.value}>
-                                                        {cat.label}
-                                                    </SelectItem>
-                                                ))}
+                                                {["ENGINE_PARTS",
+                                                    "ELECTRICAL",
+                                                    "BRAKE_SYSTEM",
+                                                    "SUSPENSION",
+                                                    "FLUIDS",
+                                                    "TOOLS",
+                                                    "BODY_PARTS",
+                                                    "ACCESSORIES",
+                                                    "MISC"].map((cat) => (
+                                                        <SelectItem key={cat} value={cat}>
+                                                            {cat}
+                                                        </SelectItem>
+                                                    ))}
                                             </SelectContent>
                                         </Select>
                                     </FormControl>

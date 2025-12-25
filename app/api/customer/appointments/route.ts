@@ -88,8 +88,7 @@ export async function GET(request: NextRequest) {
       limit,
       totalPages,
     });
-  } catch (error) {
-    console.error(error);
+  } catch {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

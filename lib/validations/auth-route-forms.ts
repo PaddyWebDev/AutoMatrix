@@ -79,6 +79,12 @@ export const createAppointmentSchema = z.object({
   priority: z.enum(AppointmentPriority, {
     message: "Please select a priority",
   }),
+
+  // Is the car accidental?
+  isAccidental: z.boolean(),
+
+  // Photos as base64 strings (optional, only if accidental)
+  photos: z.array(z.string()).optional(),
 });
 
 export type createAppointmentSchemaType = z.infer<
@@ -149,3 +155,9 @@ export const createMechanicSchema = z.object({
 });
 
 export type CreateMechanicFormData = z.infer<typeof createMechanicSchema>;
+
+export const createPaymentSchema = z.object({
+  paymentMethod: z.string().min(1, "Please select a payment method"),
+});
+
+export type createPaymentSchemaType = z.infer<typeof createPaymentSchema>;

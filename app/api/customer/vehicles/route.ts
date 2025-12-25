@@ -17,8 +17,7 @@ export async function GET(request: NextRequest) {
       message: "Success",
       vehicle_data: vehicleData,
     });
-  } catch (error) {
-    console.log(error);
+  } catch  {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
