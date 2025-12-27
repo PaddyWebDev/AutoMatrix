@@ -2,7 +2,7 @@ export interface AppointmentServiceCenter {
   id: string;
   serviceType: string;
   status: string;
-  userUrgency: string;
+  priority: string;
   requestedDate: string;
   slaDeadline: string | null;
   actualCompletionDate: string | null;
@@ -49,7 +49,7 @@ export interface ServiceCenterAppointmentView {
   id: string;
   serviceType: string;
   status: string;
-  userUrgency: string;
+  priority: string;
   requestedDate: string;
   slaDeadline: string | null;
   actualCompletionDate: string | null;

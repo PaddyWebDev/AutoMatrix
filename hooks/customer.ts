@@ -129,9 +129,8 @@ export function handleFiledUpload(
       vehicleId: string;
       serviceType: string;
       serviceCenterId: string;
-      serviceDeadline: Date;
-      priority: "LOW" | "MEDIUM" | "HIGH";
       isAccidental: boolean;
+      serviceDeadline?: Date | undefined;
       photos?: string[] | undefined;
     },
     "photos"

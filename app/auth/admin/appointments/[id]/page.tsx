@@ -70,8 +70,8 @@ export default function AppointmentDetailPage() {
             </div>
             <div>
               <label className="text-sm font-medium">Priority</label>
-              <Badge variant={appointment.userUrgency === 'HIGH' ? 'destructive' : 'secondary'}>
-                {appointment.userUrgency}
+              <Badge variant={appointment.priority === 'HIGH' ? 'destructive' : 'secondary'}>
+                {appointment.priority}
               </Badge>
             </div>
             <div>

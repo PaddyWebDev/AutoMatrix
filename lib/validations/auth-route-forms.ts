@@ -1,4 +1,3 @@
-import { AppointmentPriority } from "@prisma/client";
 import { z } from "zod";
 
 export const updateProfileFormSchema = z.object({
@@ -71,16 +70,10 @@ export const createAppointmentSchema = z.object({
     .date({
       message: "Please select a deadline",
     })
-    .refine((date) => date > new Date(), {
+    .optional()
+    .refine((date) => !date || date > new Date(), {
       message: "Deadline must be a future date",
     }),
-
-  // Priority — MUST be one of Prisma enum values
-  priority: z.enum(AppointmentPriority, {
-    message: "Please select a priority",
-  }),
-
-  // Is the car accidental?
   isAccidental: z.boolean(),
 
   // Photos as base64 strings (optional, only if accidental)
@@ -98,6 +91,18 @@ export const createJobCardSchema = z.object({
 });
 
 export type createJobCardSchemaType = z.infer<typeof createJobCardSchema>;
+
+export const updateQuantitySchema = z.object({
+  quantity: z
+    .string({
+      message: "Invalid Quantity",
+    })
+    .regex(
+      /^[1-9]\d*$/,
+      "Quantity must be a positive integer greater than zero"
+    ),
+});
+export type updateQuantitySchemaType = z.infer<typeof updateQuantitySchema>;
 
 export const createInventorySchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { useSessionContext } from '@/context/session'
-import queryClient from '@/lib/tanstack-query'
 
 interface AssignMechanicProps {
     appointmentId: string
@@ -58,7 +57,6 @@ export default function AssignMechanic({ appointmentId, alreadyAssigned, skipMec
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/appointments/${appointmentId}/assign-mechanic`, {
                     mechanicId: selectedMechanic
                 })
-                queryClient.invalidateQueries({ queryKey: ['appointment-service-center', appointmentId] })
                 toast.success(response.data)
                 setSelectedMechanic('')
             } catch (error) {

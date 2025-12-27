@@ -6,9 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
-import Link from "next/link";
 import { format, differenceInDays } from "date-fns";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,10 +18,13 @@ import { useSessionContext } from "@/context/session";
 import socket from "@/lib/socket-io";
 import { decryptSocketData } from "@/hooks/cryptr";
 import queryClient from "@/lib/tanstack-query";
-import AppointmentStatus from "@/components/service-center/status-appointment";
-import { bookingStatus } from "@prisma/client";
 import { AppointmentServiceCenter } from "@/types/service-center";
 import { NoAppointmentData } from "@/components/service-center/no-appointment-data";
+import ViewAppointmentDetails from "@/components/service-center/view-appointment-details";
+import { bookingStatus } from "@prisma/client";
+import Link from "next/link";
+
+
 
 const filterSchema = z.object({
     status: z.string().optional(),
@@ -129,10 +130,43 @@ export default function AppointmentsPage() {
             );
         }
 
+        async function updatedAppointmentDecision(data: {
+            appointmentId: string,
+            status: string,
+            priority: string,
+            deadline: string,
+        }) {
+            queryClient.setQueryData<AppointmentsResponse>(['appointments-service-center', currentPage, filters], function (prevData) {
+                if (!prevData) return prevData
+                return {
+                    ...prevData,
+                    appointments: prevData.appointments.map((appointment) => (
+                        appointment.id !== data.appointmentId ? {
+                            ...appointment
+                        } : appointment.status === "APPROVED" ? {
+                            ...appointment,
+                            status: data.status,
+                            priority: data.priority,
+                            slaDeadline: data.deadline
+                        } : {
+                            ...appointment,
+                            status: data.status
+                        }
+                    ))
+
+                }
+
+            })
+        }
+
         socket.connect();
         socket.on(`new-appointment-${session?.user.id}`, async (data) => {
             newAppointment(await decryptSocketData(data))
         });
+
+        socket.on(`${session?.user.id}-appointment-decision-update`, async (socketData: string) => {
+            updatedAppointmentDecision(await decryptSocketData(socketData))
+        })
 
         socket.on(
             `status-update-appointment-${session?.user.id}`, async (data: string) => {
@@ -143,6 +177,7 @@ export default function AppointmentsPage() {
         return () => {
             socket.off(`new-appointment-${session?.user.id}`)
             socket.off(`status-update-appointment-${session?.user.id}`)
+            socket.disconnect()
         }
     }, [session?.user.id, currentPage, filters]);
 
@@ -253,7 +288,7 @@ export default function AppointmentsPage() {
                                     }
                                     return (
                                         <TableRow key={appointment.id}>
-                                            <TableCell>{appointment?.userUrgency || 'N/A'}</TableCell>
+                                            <TableCell>{appointment?.priority || 'N/A'}</TableCell>
                                             <TableCell>
                                                 {appointment.owner.name} ({appointment.owner.email})
                                             </TableCell>
@@ -273,6 +308,13 @@ export default function AppointmentsPage() {
                                                 {deadline ? format(deadline, "dd MMM yyyy, hh:mm a") : "N/A"}
                                             </TableCell>
                                             <TableCell>
+
+                                                {
+                                                    appointment.status === "PENDING" && (
+                                                        <ViewAppointmentDetails appointment={appointment} />
+
+                                                    )
+                                                }
                                                 {
                                                     ([bookingStatus.APPROVED.toString(), bookingStatus.InService.toString(), bookingStatus.COMPLETED.toString()].includes(appointment.status)) && (
                                                         <Link href={`/auth/service-center/appointments/${appointment.id}`}>
@@ -282,14 +324,7 @@ export default function AppointmentsPage() {
                                                         </Link>
                                                     )
                                                 }
-                                                {
-                                                    appointment.status === "PENDING" && (
-                                                        <div className="flex items-center gap-2">
-                                                            <AppointmentStatus appointmentId={appointment.id} status="REJECTED" />
-                                                            <AppointmentStatus appointmentId={appointment.id} status="APPROVED" />
-                                                        </div>
-                                                    )
-                                                }
+
                                             </TableCell>
                                         </TableRow>
                                     );

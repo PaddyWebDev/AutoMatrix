@@ -16,7 +16,7 @@ function autoTriagePriority(serviceType: string): "LOW" | "MEDIUM" | "HIGH" {
 function isEscalated(appointment: Appointment): boolean {
   const now = new Date();
   if (
-    appointment.userUrgency === "HIGH" &&
+    appointment.priority === "HIGH" &&
     appointment.slaDeadline &&
     new Date(appointment.slaDeadline) < now
   )
@@ -49,7 +49,7 @@ export async function GET() {
         id: appt.id,
         vehicleName: appt.Vehicle.vehicleName,
         serviceType: appt.serviceType,
-        priority: appt.userUrgency || autoTriagePriority(appt.serviceType),
+        priority: appt.priority || autoTriagePriority(appt.serviceType),
         status: appt.status,
         requestedDate: appt.requestedDate.toISOString(),
         slaDeadline: appt.slaDeadline?.toISOString() || null,

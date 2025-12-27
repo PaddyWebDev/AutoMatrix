@@ -109,7 +109,7 @@ export type AppointmentViewCustomerRoute = {
   slaDeadline: Date;
   actualCompletionDate: Date;
   slaBreached: boolean;
-  userUrgency: AppointmentPriority;
+  priority: AppointmentPriority;
   Vehicle: {
     vehicleName: string;
     vehicleMake: string;

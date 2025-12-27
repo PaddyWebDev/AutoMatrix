@@ -20,7 +20,9 @@ async function dynamicWhereClause(
       status: true,
       requestedDate: true,
       actualCompletionDate: true,
-      userUrgency: true,
+      priority: true,
+      isAccidental: true,
+      photos: true,
       slaDeadline: true,
       Vehicle: {
         select: {
@@ -66,7 +68,7 @@ export async function GET(request: NextRequest) {
     } else if (priority) {
       appointments = await dynamicWhereClause(
         {
-          userUrgency: priority as AppointmentPriority,
+          priority: priority as AppointmentPriority,
         },
         limit,
         skip

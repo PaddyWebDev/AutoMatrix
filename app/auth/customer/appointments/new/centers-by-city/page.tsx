@@ -2,7 +2,7 @@
 
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {  useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,7 +26,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useVehicles, useServiceCentersFetchAll, handleFiledUpload } from "@/hooks/customer";
 import { useSessionContext } from "@/context/session";
-import { AppointmentPriority, ServiceCenter, Vehicle } from "@prisma/client";
+import { ServiceCenter, Vehicle } from "@prisma/client";
 import { createAppointmentSchema, createAppointmentSchemaType } from "@/lib/validations/auth-route-forms";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
@@ -49,7 +49,6 @@ export default function BookAppointmentPage() {
       vehicleId: undefined,
       serviceType: undefined,
       serviceCenterId: undefined,
-      priority: undefined,
       serviceDeadline: undefined,
       isAccidental: false,
       photos: undefined
@@ -170,36 +169,6 @@ export default function BookAppointmentPage() {
                     <FormLabel>Service Type</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., Oil Change, Brake Repair" disabled={isPending} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}
-                        disabled={isPending}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choose the priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={AppointmentPriority.LOW.toString()}>
-                            {AppointmentPriority.LOW}
-                          </SelectItem>
-                          <SelectItem value={AppointmentPriority.MEDIUM.toString()}>
-                            {AppointmentPriority.MEDIUM}
-                          </SelectItem>
-                          <SelectItem value={AppointmentPriority.HIGH.toString()}>
-                            {AppointmentPriority.HIGH}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

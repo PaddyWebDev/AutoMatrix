@@ -14,6 +14,7 @@ import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { Inventory } from "@prisma/client";
 import DeleteInventoryItem from "@/components/service-center/delete-inventory-item";
+import AddQuantityInventoryItem from "@/components/service-center/edit-inventory-item";
 
 export default function InventoryPage() {
     const { session } = useSessionContext();
@@ -175,6 +176,8 @@ export default function InventoryPage() {
                                         </div>
 
                                         <div className="flex space-x-2">
+
+                                            <AddQuantityInventoryItem inventoryId={item.id} serviceCenterId={item.serviceCenterId} name={item.name} sku={item.sku} brand={item.brand!} />
                                             <Button
                                                 size="sm"
                                                 variant="outline"

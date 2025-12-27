@@ -153,12 +153,12 @@ export default function AppointmentsPage() {
                       <TableCell>
                         <Badge
                           variant={
-                            appointment.userUrgency === 'HIGH' ? 'destructive' :
-                              appointment.userUrgency === 'MEDIUM' ? 'default' :
+                            appointment.priority === 'HIGH' ? 'destructive' :
+                              appointment.priority === 'MEDIUM' ? 'default' :
                                 'secondary'
                           }
                         >
-                          {appointment.userUrgency}
+                          {appointment.priority}
                         </Badge>
                       </TableCell>
                       <TableCell>

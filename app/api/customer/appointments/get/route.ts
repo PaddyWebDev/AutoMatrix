@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
         slaBreached: true,
         status: true,
         serviceType: true,
-        userUrgency: true,
         Vehicle: {
           select: {
             vehicleName: true,

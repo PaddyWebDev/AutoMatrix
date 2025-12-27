@@ -110,7 +110,7 @@ export default function CustomerAppointments() {
             </div>
             <div className="flex items-center gap-2">
               <span className="font-medium">Priority:</span>
-              <Badge variant="outline">{appointment.userUrgency}</Badge>
+              <Badge variant="outline">{appointment.priority}</Badge>
             </div>
           </div>
 

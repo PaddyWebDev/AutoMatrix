@@ -26,6 +26,8 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { Session } from "next-auth";
 import Image from "next/image";
 import { NoAppointmentData } from "@/components/service-center/no-appointment-data";
+import socket from "@/lib/socket-io";
+import { decryptSocketData } from "@/hooks/cryptr";
 
 
 export default function AppointmentDetailPage() {
@@ -49,7 +51,6 @@ export default function AppointmentDetailPage() {
     )
   }
 
-  console.log(appointment.Mechanic);
 
   if (appointment === null) {
     return (
@@ -73,6 +74,38 @@ interface RenderAppointmentDataProps {
 }
 function RenderAppointmentData({ appointment, router, id, session }: RenderAppointmentDataProps) {
   const [isPending, startTransition] = React.useTransition();
+  React.useEffect(() => {
+
+    async function AssignMechanic(socketData: string) {
+      const data: {
+        id: string,
+        name: string
+      } = await decryptSocketData(socketData)
+      queryClient.setQueryData(["appointment-service-center", id], function (prevData: AppointmentServiceCenter): AppointmentServiceCenter {
+        if (!prevData) return prevData
+        return {
+          ...prevData,
+          Mechanic: [
+            ...(prevData.Mechanic ?? []),
+            {
+              mechanicId: data.id,
+              name: data.name,
+            },
+          ],
+        }
+      })
+    }
+
+    socket.connect()
+    socket.on(`mechanic-assignment-${session?.user.id}`, async (socketData: string) => {
+      AssignMechanic(socketData)
+    })
+
+    return () => {
+      socket.disconnect()
+    }
+
+  })
 
   async function updateAppointmentStatus(updatedStatus: string) {
     startTransition(async () => {

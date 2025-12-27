@@ -24,7 +24,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useVehicles, useServiceCenters, handleFiledUpload } from "@/hooks/customer";
 import { useSessionContext } from "@/context/session";
-import { AppointmentPriority, Vehicle } from "@prisma/client";
+import { Vehicle } from "@prisma/client";
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { createAppointmentSchema, createAppointmentSchemaType } from "@/lib/validations/auth-route-forms";
@@ -49,7 +49,6 @@ export default function BookAppointmentPage() {
       vehicleId: "",
       serviceType: "",
       serviceCenterId: "",
-      priority: undefined,
       serviceDeadline: undefined,
       isAccidental: false,
       photos: undefined,
@@ -167,40 +166,13 @@ export default function BookAppointmentPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} >
-                        <SelectTrigger className="w-full" disabled={isPending}>
-                          <SelectValue placeholder="Choose the priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={AppointmentPriority.LOW.toString()}>
-                            {AppointmentPriority.LOW}
-                          </SelectItem>
-                          <SelectItem value={AppointmentPriority.MEDIUM.toString()}>
-                            {AppointmentPriority.MEDIUM}
-                          </SelectItem>
-                          <SelectItem value={AppointmentPriority.HIGH.toString()}>
-                            {AppointmentPriority.HIGH}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name="serviceDeadline"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Service Deadline</FormLabel>
+                    <FormLabel>{"Service Deadline(Optional)"}</FormLabel>
                     <FormControl>
                       <AppointmentDatePicker disabledStatus={isPending} value={field.value} onChange={field.onChange} />
                     </FormControl>

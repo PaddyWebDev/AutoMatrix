@@ -61,7 +61,7 @@ export interface AppointmentAdmin {
   slaDeadline: string | null;
   actualCompletionDate: string | null;
   slaBreached: boolean;
-  userUrgency: string;
+  priority: string;
   status: string;
   serviceCenterId: string;
   Vehicle: {

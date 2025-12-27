@@ -18,12 +18,13 @@ export function useAppointment(appointmentId: string) {
 
 export function useInventory(serviceCenterId: string) {
   return useQuery<Inventory[]>({
-    queryKey: ["inventory-items-service-center"],
+    queryKey: ["inventory-items-service-center", serviceCenterId],
     queryFn: async () => {
       const response = await axios.get(
         `/api/service-centers/inventory?serviceCenterId=${serviceCenterId}`
       );
       return response.data.inventory_data;
     },
+    enabled: !!serviceCenterId,
   });
 }
