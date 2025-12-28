@@ -1,8 +1,15 @@
 import prisma from "@/lib/db";
-import { NextResponse } from "next/server";
-export async function GET() {
+import { NextRequest, NextResponse, } from "next/server";
+export async function GET(request: NextRequest) {
+  const serviceCenterId = request.nextUrl.searchParams.get("scId")
   try {
+    if(!serviceCenterId){
+      return new NextResponse("Service Center Id is required", {status: 400})
+    }
     const appointmentData = await prisma.appointment.findMany({
+      where: {
+        serviceCenterId
+      },
       orderBy: {
         slaDeadline: "asc",
       },

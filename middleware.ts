@@ -13,6 +13,7 @@ export default auth(async (request: NextAuthRequest) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
 
+
   if (isApiAuthRoute) {
     return;
   }

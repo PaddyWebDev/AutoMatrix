@@ -24,7 +24,7 @@ export default function ServiceCenterDashboard() {
   const { data: appointments, isLoading, isError, isFetching } = useQuery<AppointmentServiceCenterDashboard[]>({
     queryKey: ['appointments', session?.user.id],
     queryFn: async () => {
-      const response = await axios.get("/api/service-centers/appointments/dashboard")
+      const response = await axios.get(`/api/service-centers/appointments/dashboard?scId=${session?.user.id}`)
       return response.data.appointment_data
     },
     enabled: !!session?.user.id,

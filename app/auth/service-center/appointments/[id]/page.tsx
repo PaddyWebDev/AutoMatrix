@@ -86,7 +86,9 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
         return {
           ...prevData,
           Mechanic: [
-            ...(prevData.Mechanic ?? []),
+            ...(prevData.Mechanic ?? []).filter(
+              (m) => m.mechanicId !== data.id
+            ),
             {
               mechanicId: data.id,
               name: data.name,
@@ -264,7 +266,7 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col ">
-          <div className="mb-4">
+          <div className="mb-4 flex items-center gap-4 ">
 
             {["InService", "COMPLETED"].includes(appointment.status)
               && (
