@@ -16,8 +16,6 @@ import { Button } from '../ui/button';
 import toast from 'react-hot-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import axios from 'axios';
-import queryClient from '@/lib/tanstack-query';
-import { Inventory } from '@prisma/client';
 
 export default function CreateInventoryItem({ serviceCenterId }: { serviceCenterId: string }) {
     const [isPending, startTransition] = React.useTransition()
@@ -42,15 +40,12 @@ export default function CreateInventoryItem({ serviceCenterId }: { serviceCenter
                     toast.error("Failed to validate fields");
                     return;
                 }
-
                 const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/create`, {
                     ...validatedFields.data,
                     serviceCenterId: serviceCenterId,
                 })
-                toast.success(response.data.message);
-                queryClient.setQueryData(["inventory-items"], function (prevInventoryItems: Inventory[] = []) {
-                    return [...prevInventoryItems, response.data.new_inventory_item]
-                })
+                toast.success(response.data);
+                form.reset()
             } catch (error) {
                 if (axios.isAxiosError(error)) {
                     toast.error(error.response?.data || "Failed to add inventory item");

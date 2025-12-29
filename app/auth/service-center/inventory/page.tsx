@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 "use client";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +13,30 @@ import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { Inventory } from "@prisma/client";
 import DeleteInventoryItem from "@/components/service-center/delete-inventory-item";
-import AddQuantityInventoryItem from "@/components/service-center/edit-inventory-item";
+import AddQuantityInventoryItem from "@/components/service-center/add-quantity-inventory-item";
+import socket from "@/lib/socket-io";
+import { decryptSocketData } from "@/hooks/cryptr";
+import queryClient from "@/lib/tanstack-query";
 
 export default function InventoryPage() {
     const { session } = useSessionContext();
     const { data: inventory, isLoading, isFetching, isError } = useInventory(session?.user.id!)
     const [searchTerm, setSearchTerm] = useState("");
+
+    React.useEffect(() => {
+        socket.connect()
+        socket.on(`new-inventory-item-${session?.user.id}`, async function (socketData: string) {
+            const newInventoryItem: Inventory = await decryptSocketData(socketData)
+            queryClient.setQueryData(["inventory-items-service-center", session?.user.id], function (prevInventoryItems: Inventory[] = []) {
+                return [...prevInventoryItems, newInventoryItem]
+            })
+        })
+        return () => {
+            socket.off(`new-inventory-item-${session?.user.id}`)
+        }
+
+    }, [session?.user.id])
+
 
     if (isLoading || isFetching) {
         return (
@@ -32,6 +49,7 @@ export default function InventoryPage() {
             <TanstackError />
         )
     }
+
 
 
 

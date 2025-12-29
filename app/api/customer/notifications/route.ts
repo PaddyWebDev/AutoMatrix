@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     const notifications = await prisma.customerNotification.findMany({
       where: {
-        customerId: userId,
+        customerId: userId,   
       },
       orderBy: {
         createdAt: "desc",

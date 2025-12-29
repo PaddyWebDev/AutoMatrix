@@ -75,11 +75,16 @@ export default function ServiceCenterNotifications() {
     },
   });
 
-  const markAllAsRead = () => {
-    queryClient.setQueryData<Notification[]>(
-      ["service-center-notifications"],
-      (old = []) => old.map(n => ({ ...n, isRead: true }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/notifications/service-center/${session?.user.id}/mark-all-read`)
+      queryClient.setQueryData<Notification[]>(
+        ["service-center-notifications"],
+        (old = []) => old.map(n => ({ ...n, isRead: true }))
+      );
+    } catch {
+      toast.error("Failed to mark read")
+    }
   };
 
   return (

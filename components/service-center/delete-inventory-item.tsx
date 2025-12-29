@@ -20,7 +20,6 @@ export default function DeleteInventoryItem({ serviceCenterId, inventoryItemId }
         startTransition(async () => {
             try {
                 const response = await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/inventory/delete/${inventoryItemId}?serviceCenterId=${serviceCenterId}`)
-                console.log(response.data);
                 queryClient.setQueryData(["inventory-items"], function (prevData: Inventory[]
                 ) {
                     return prevData.filter((item) => item.id !== inventoryItemId)

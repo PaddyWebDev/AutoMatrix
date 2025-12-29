@@ -76,20 +76,25 @@ export default function CustomerNotifications() {
     },
   });
 
-  const markAllAsRead = () => {
-    queryClient.setQueryData<Notification[]>(
-      ["customer-notifications"],
-      (old = []) => old.map(n => ({ ...n, isRead: true }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/notifications/customer/${session?.user.id}/mark-all-read`)
+      queryClient.setQueryData<Notification[]>(
+        ["customer-notifications"],
+        (old = []) => old.map(n => ({ ...n, isRead: true }))
+      );
+    } catch {
+      toast.error("Failed to mark as read")
+    }
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline"  className="relative">
+        <Button variant="outline" className="relative">
           <Bell className="mr-2 h-4 w-4" />
           Notifications
-          {unreadCount > 0  && (
+          {unreadCount > 0 && (
             <Badge className="ml-2 " variant="destructive">
               {unreadCount}
             </Badge>

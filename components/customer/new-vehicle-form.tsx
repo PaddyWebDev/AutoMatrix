@@ -20,18 +20,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useSessionContext } from "@/context/session";
 import { vehicleSchema, vehicleSchemaType } from "@/lib/validations/auth-route-forms";
 import { Dialog, DialogFooter, DialogTrigger, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 import axios from "axios";
 import toast from "react-hot-toast";
-import queryClient from "@/lib/tanstack-query";
-import { Vehicle } from "@prisma/client";
 
 
 
-export default function AddVehiclePage() {
-    const { session } = useSessionContext()
+
+export default function AddVehiclePage({ userId }: { userId: string }) {
     const [isPending, startTransition] = React.useTransition();
 
     const form = useForm<vehicleSchemaType>({
@@ -57,16 +54,11 @@ export default function AddVehiclePage() {
                     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/vehicles/add`,
                     {
                         ...validatedFields.data,
-                        userId: session?.user.id,
+                        userId: userId,
                     }
                 );
-                queryClient.setQueryData<Vehicle[]>(
-                    ["vehicles", session?.user.id],
-                    (prevVehicles: Vehicle[] = []) => {
-                        return [...prevVehicles, response.data.new_vehicle as Vehicle];
-                    }
-                );
-                toast.success(response.data.message)
+
+                toast.success(response.data)
                 form.reset()
             } catch (error) {
                 if (axios.isAxiosError(error)) {

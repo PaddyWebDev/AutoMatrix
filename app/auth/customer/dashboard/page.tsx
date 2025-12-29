@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +11,34 @@ import AddVehiclePage from "@/components/customer/new-vehicle-form";
 import { Vehicle } from "@prisma/client";
 import { format } from "date-fns";
 import { customerAppointment } from "@/types/customer";
+import { useEffect } from "react";
+import socket from "@/lib/socket-io";
+import { decryptSocketData } from "@/hooks/cryptr";
+import queryClient from "@/lib/tanstack-query";
 
 
 export default function CustomerDashboard() {
   const { session } = useSessionContext();
   const { data: vehicles = [], isLoading, isFetching, isError } = useVehicles(session?.user?.id);
   const { data: appointments = [], isLoading: appointmentLoading, isFetching: appointmentFetching, isError: AppointmentError } = useAppointments(session?.user.id)
+
+  useEffect(() => {
+
+    socket.connect()
+    socket.on(`new-vehicle-${session?.user.id}`, async (socketData: string) => {
+      const decryptedData = await decryptSocketData(socketData)
+      queryClient.setQueryData<Vehicle[]>(
+        ["vehicles", session?.user.id],
+        (prevVehicles: Vehicle[] = []) => {
+          return [...prevVehicles, decryptedData as Vehicle];
+        }
+      );
+    })
+
+    return () => {
+      socket.off(`new-vehicle-${session?.user.id}`)
+    }
+  })
 
 
   if (isLoading || isFetching || appointmentLoading || appointmentFetching) {
@@ -59,7 +82,7 @@ export default function CustomerDashboard() {
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <h1 className="text-3xl font-bold">My Vehicles</h1>
-            <AddVehiclePage />
+            <AddVehiclePage userId={session?.user.id!} />
           </CardTitle>
         </CardHeader>
         <CardContent>

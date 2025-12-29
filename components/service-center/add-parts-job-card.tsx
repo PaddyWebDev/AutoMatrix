@@ -9,8 +9,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import toast from 'react-hot-toast'
-import queryClient from '@/lib/tanstack-query'
-import { AppointmentServiceCenter } from '@/types/service-center'
 import { AddPartForm, addPartSchema } from '@/lib/validations/auth-route-forms'
 
 interface AddPartsToJobCardProps {
@@ -50,31 +48,9 @@ export default function AddPartsToJobCard({ appointmentId, jobCardId, serviceCen
                     appointmentId: appointmentId
                 })
 
-                queryClient.setQueryData(
-                    ["appointment-service-center", appointmentId],
-                    (prev: AppointmentServiceCenter | undefined): AppointmentServiceCenter | undefined => {
-                        if (!prev) return prev;
+         
 
-                        return {
-                            ...prev,
-                            JobCards: prev.JobCards.map((jobCard) => {
-                                if (jobCard.id !== jobCardId) return jobCard;
-
-                                return {
-                                    ...jobCard,
-                                    price: jobCard.price + response.data.new_part_job_card.partUsed.unitPrice,
-                                    JobCardParts: [
-                                        ...(jobCard.JobCardParts ?? []),
-                                        response.data.new_part_job_card
-                                    ]
-                                };
-                            }),
-                        };
-                    }
-                );
-
-                console.log(queryClient.getQueryData(
-                    ["appointment-service-center", appointmentId]));
+           
 
                 toast.success(response.data.message)
                 form.reset()

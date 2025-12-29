@@ -98,12 +98,70 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
       })
     }
 
+
+    async function addJobCardPart(socketData: string) {
+      const newPart: {
+        jobCardId: string;
+        partId: string;
+        quantity: number;
+        partUsed: {
+          name: string;
+          unitPrice: number;
+        };
+      } = await decryptSocketData(socketData)
+      queryClient.setQueryData(
+        ["appointment-service-center", id],
+        (prev: AppointmentServiceCenter | undefined): AppointmentServiceCenter | undefined => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            JobCards: prev.JobCards.map((jobCard) => {
+              if (jobCard.id !== newPart.jobCardId) return jobCard;
+
+              return {
+                ...jobCard,
+                price: jobCard.price + newPart.partUsed.unitPrice,
+                JobCardParts: [
+                  ...(jobCard.JobCardParts ?? []),
+                  newPart
+                ]
+              };
+            }),
+          };
+        }
+      );
+    }
+
+    async function addJobCard(socketData: string) {
+      const NewJobCard = await decryptSocketData(socketData)
+      queryClient.setQueryData(["appointment-service-center", id], function (prevData: AppointmentServiceCenter
+      ) {
+        if (!prevData) return prevData;
+        return {
+          ...prevData,
+          JobCards: [...prevData.JobCards, NewJobCard],
+        };
+      })
+
+    }
+
     socket.connect()
     socket.on(`mechanic-assignment-${session?.user.id}`, async (socketData: string) => {
-      AssignMechanic(socketData)
+      await AssignMechanic(socketData)
+    })
+
+    socket.on(`new-job-card-part-${session?.user.id}`, async (socketData: string) => {
+      await addJobCardPart(socketData)
+    })
+    socket.on(`new-job-card-${session?.user.id}`, async (socketData: string) => {
+      await addJobCard(socketData)
     })
 
     return () => {
+      socket.off(`mechanic-assignment-${session?.user.id}`)
+      socket.off(`new-job-card-part-${session?.user.id}`)
+      socket.off(`new-job-card-${session?.user.id}`)
       socket.disconnect()
     }
 
