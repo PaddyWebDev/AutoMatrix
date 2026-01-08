@@ -166,3 +166,10 @@ export const createPaymentSchema = z.object({
 });
 
 export type createPaymentSchemaType = z.infer<typeof createPaymentSchema>;
+
+export const completeServiceSchema = z.object({
+  note: z.string().min(5, "Note is required"),
+  attachments: z.array(z.string()).optional(),
+});
+
+export type completeServiceType = z.infer<typeof completeServiceSchema>;

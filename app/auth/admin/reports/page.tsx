@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
+import * as ExcelJS from 'exceljs';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from 'recharts';
 import Loader from "@/components/Loader";
 import TanstackError from "@/components/TanstackError";
 import { useReportsForAdmin, useServiceCentersForAdminReports } from "@/hooks/admin";
@@ -68,6 +70,57 @@ export default function AdminReportsPage() {
 
     doc.save("service-center-reports.pdf");
     toast.success("Report exported to PDF!");
+  };
+
+  const exportToExcel = async () => {
+    if (!data) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Service Center Reports');
+
+    // Add headers
+    worksheet.columns = [
+      { header: 'Service Center', key: 'serviceCenter', width: 25 },
+      { header: 'Avg Resolution Time (days)', key: 'avgResolutionTime', width: 25 },
+      { header: 'SLA Breaches', key: 'slaBreaches', width: 15 },
+      { header: 'Total Appointments', key: 'totalAppointments', width: 20 },
+      { header: 'Completion Rate (%)', key: 'completionRate', width: 20 },
+      { header: 'Hotspot City', key: 'hotspotCity', width: 20 },
+      { header: 'Appointment Volume', key: 'appointmentVolume', width: 20 },
+    ];
+
+    // Add data
+    data.forEach((report) => {
+      worksheet.addRow({
+        serviceCenter: report.serviceCenterName,
+        avgResolutionTime: report.avgResolutionTime,
+        slaBreaches: report.slaBreaches,
+        totalAppointments: report.agentKPIs.totalAppointments,
+        completionRate: report.agentKPIs.completionRate,
+        hotspotCity: report.hotspot.city,
+        appointmentVolume: report.hotspot.appointmentVolume,
+      });
+    });
+
+    // Style the header row
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE6E6FA' }
+    };
+
+    // Generate buffer and download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'service-center-reports.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast.success("Report exported to Excel!");
   };
 
   if (isLoading || isServiceCenterLoading || !isServiceCenterFetched || isFetching) return <Loader />;
@@ -144,10 +197,153 @@ export default function AdminReportsPage() {
         </CardContent>
       </Card>
 
-      {/* Export Button */}
-      <div className="flex justify-end">
+      {/* Charts */}
+      {data && data.length > 0 && (
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Completion Rate Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Completion Rate by Service Center</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="serviceCenterName" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="agentKPIs.completionRate" fill="#8884d8" name="Completion Rate (%)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* SLA Breaches Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>SLA Breaches by Service Center</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="serviceCenterName" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="slaBreaches" fill="#82ca9d" name="SLA Breaches" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Total Appointments Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Total Appointments by Service Center</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={data.map(report => ({
+                      name: report.serviceCenterName,
+                      value: report.agentKPIs.totalAppointments
+                    }))}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={`hsl(${index * 45}, 70%, 50%)`} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Resolution Time Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Average Resolution Time</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="serviceCenterName" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="avgResolutionTime" stroke="#ff7300" name="Avg Resolution Time (days)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Hotspot Locations Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Appointment Locations (Hotspots)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={Object.entries(
+                      data.reduce((acc, report) => {
+                        if (report.hotspot.city) {
+                          acc[report.hotspot.city] = (acc[report.hotspot.city] || 0) + report.hotspot.appointmentVolume;
+                        }
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([location, appointments]) => ({ name: location, value: appointments }))
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 6)}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {Object.entries(
+                      data.reduce((acc, report) => {
+                        if (report.hotspot.city) {
+                          acc[report.hotspot.city] = (acc[report.hotspot.city] || 0) + report.hotspot.appointmentVolume;
+                        }
+                        return acc;
+                      }, {} as Record<string, number>)
+                    ).map(([location, appointments]) => ({ name: location, value: appointments }))
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 6).map((entry, index) => {
+                      const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+                      return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                    })}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Export Buttons */}
+      <div className="flex justify-end gap-4">
         <Button onClick={exportToPDF} disabled={!data || data.length === 0}>
           Export to PDF
+        </Button>
+        <Button onClick={exportToExcel} disabled={!data || data.length === 0}>
+          Export to Excel
         </Button>
       </div>
 

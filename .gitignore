@@ -20,6 +20,8 @@
 
 *.groovy
 
+*.mmd
+
 # production
 /build
 

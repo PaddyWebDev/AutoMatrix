@@ -18,10 +18,6 @@ export default function GuestNavbar() {
             name: "Home",
             route: "/",
         },
-        {
-            name: "Sign In / Register",
-            route: "/guest/Login",
-        },
     ]
 
 
@@ -66,8 +62,8 @@ export default function GuestNavbar() {
                                     <span className="sr-only">Toggle navigation menu</span>
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent className='dark:bg-gray-950 border-l  dark:border-gray-700' side="right">
-                                <nav className="grid gap-6 text-lg font-medium mt-7">
+                            <SheetContent className='dark:bg-neutral-950 border-l  dark:border-neutral-700' side="right">
+                                <nav className="grid gap-6 text-lg font-medium mt-7 m-5">
                                     {
                                         NavLinks.map((navLink: NavLink, id: number) => (
                                             <Link

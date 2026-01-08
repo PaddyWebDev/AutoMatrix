@@ -31,9 +31,11 @@ export interface AppointmentServiceCenter {
       };
     }[];
   }[];
-  Mechanic: {
+  MechanicAssignment: {
     mechanicId: string;
-    name: string;
+    mechanic: {
+      name: string;
+    };
   }[];
   Invoice?: {
     id: string;
@@ -42,6 +44,12 @@ export interface AppointmentServiceCenter {
     billingDate: string;
     dueDate: string;
     status: string;
+  };
+  Feedback?: {
+    id: string;
+    rating: number;
+    comment?: string;
+    createdAt: string;
   };
 }
 

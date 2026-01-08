@@ -52,6 +52,7 @@ export default function GenerateInvoice({ appointmentId, totalAmount, disabledSt
                 toast.success(response.data.message);
 
             } catch (error) {
+                console.log(error);
                 toast.error(axios.isAxiosError(error) ? error.response?.data : "Error Occurred while generating the invoice")
             }
         })

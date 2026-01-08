@@ -3,9 +3,11 @@ import {
   Calendar,
   CalendarDays,
   Car,
+  FileText,
   Home,
   LocateFixedIcon,
   LucideIcon,
+  MessageSquare,
   Receipt,
   Search,
   Settings,
@@ -36,4 +38,7 @@ export const iconMap = new Map<string, LucideIcon>([
   ["boxes", Boxes],
   ["receipt", Receipt],
   ["wrench", Wrench],
+  ["messageSquare", MessageSquare],
+  ["fileText",FileText]
+
 ]);

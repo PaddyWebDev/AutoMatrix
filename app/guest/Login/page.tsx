@@ -31,7 +31,7 @@ export default function Login() {
         defaultValues: {
             email: "",
             password: "",
-            role: ""
+            role: undefined
         }
     })
 

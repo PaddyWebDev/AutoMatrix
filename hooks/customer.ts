@@ -4,7 +4,7 @@ import {
 } from "@/types/customer";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { ControllerRenderProps } from "react-hook-form";
+import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
 import toast from "react-hot-toast";
 
 export const useVehicles = (userId?: string) => {
@@ -123,18 +123,16 @@ export function useCustomerAppointments(appointmentId: string) {
   });
 }
 
-export function handleFiledUpload(
-  field: ControllerRenderProps<
-    {
-      vehicleId: string;
-      serviceType: string;
-      serviceCenterId: string;
-      isAccidental: boolean;
-      serviceDeadline?: Date | undefined;
-      photos?: string[] | undefined;
-    },
-    "photos"
-  >,
+// export function handleFiledUpload(
+//   field: ControllerRenderProps<unknown>,
+//   e: React.ChangeEvent<HTMLInputElement>
+// ) {
+
+export function handleFiledUpload<
+  TFieldValues extends FieldValues,
+  TName extends Path<TFieldValues>
+>(
+  field: ControllerRenderProps<TFieldValues, TName>,
   e: React.ChangeEvent<HTMLInputElement>
 ) {
   const files = Array.from(e.target.files || []);

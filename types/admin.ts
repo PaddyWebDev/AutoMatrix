@@ -114,3 +114,29 @@ export type AppointmentsResponseAdmin ={
     totalPages: number;
   };
 }
+
+export interface FeedbackWithDetails {
+  id: string;
+  rating: number;
+  comment: string | null;
+  attachments: string[];
+  createdAt: string;
+  appointment: {
+    id: string;
+    serviceType: string;
+    owner: {
+      id: string;
+      name: string;
+      email: string;
+    };
+    Vehicle: {
+      id: string;
+      vehicleName: string;
+      numberPlate: string;
+    };
+    serviceCenter: {
+      id: string;
+      name: string;
+    };
+  };
+}

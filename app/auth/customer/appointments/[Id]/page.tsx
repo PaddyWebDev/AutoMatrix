@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Calendar, Clock, Car, Wrench, Package, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import Loader from '@/components/Loader';
+import ServiceFeedback from '@/components/customer/service-feedback';
 
 export default function CustomerAppointments() {
   const { Id } = useParams();
@@ -257,6 +258,24 @@ export default function CustomerAppointments() {
                 </Badge>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Feedback */}
+      {appointment.status === 'COMPLETED' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Service Feedback</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Share your experience with the service provided by {appointment.serviceCenter.name}.
+            </p>
+            <ServiceFeedback
+              appointmentId={appointment.id}
+              serviceCenterName={appointment.serviceCenter.name}
+            />
           </CardContent>
         </Card>
       )}

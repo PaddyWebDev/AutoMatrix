@@ -1,5 +1,6 @@
 import Sidebar from '@/components/auth-sidebar'
 import ThemeSwitcher from '@/components/theme-switcher'
+import AdminNotifications from '@/components/admin/notifications'
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { SessionProvider } from '@/context/session'
 import { getSessionUser } from '@/hooks/user'
@@ -22,7 +23,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             label: "Appointments", href: "/auth/admin/appointments", icon: 'calendarDays'
         },
         {
-            label: "Reports", href: "/auth/admin/reports", icon: 'calendarDays'
+            label: "Feedback", href: "/auth/admin/feedback", icon: 'messageSquare'
+        },
+        {
+            label: "Reports", href: "/auth/admin/reports", icon: 'fileText'
         }
     ]
     return (
@@ -46,7 +50,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                             </h1>
                         </div>
 
-                        <ThemeSwitcher />
+                        <div className="flex items-center gap-2">
+                            <AdminNotifications />
+                            <ThemeSwitcher />
+                        </div>
                     </header>
 
                     {/* Page content */}

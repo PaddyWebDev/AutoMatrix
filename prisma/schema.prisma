@@ -71,6 +71,8 @@ enum bookingStatus {
   PENDING
   InService
   COMPLETED
+  FEEDBACK
+  RE_OPENED
 }
 
 enum AppointmentPriority {
@@ -82,17 +84,18 @@ enum AppointmentPriority {
 model Appointment {
   id                   String               @id @default(cuid())
   vehicleId            String
+  serviceCenterId      String
   userId               String
   serviceType          String
   requestedDate        DateTime             @default(now())
   slaDeadline          DateTime?
   actualCompletionDate DateTime?
   slaBreached          Boolean              @default(false)
+  slaBreachedReason    String?
   priority             AppointmentPriority?
   status               bookingStatus
   isAccidental         Boolean              @default(false)
   photos               String[]
-  serviceCenterId      String
   owner                User                 @relation(fields: [userId], references: [id])
   Vehicle              Vehicle              @relation(fields: [vehicleId], references: [id])
   serviceCenter        ServiceCenter        @relation(fields: [serviceCenterId], references: [id])
@@ -100,7 +103,10 @@ model Appointment {
   Invoice              Invoice?
   Triage               Triage[]
   Payment              Payment?
-  Mechanic             Mechanic[]
+  Resolution           Resolution?
+  Feedback             Feedback?
+  AppointmentLog       AppointmentLog[]
+  MechanicAssignment   MechanicAssignment[]
 
   @@index([vehicleId])
   @@index([serviceCenterId])
@@ -181,31 +187,25 @@ enum MechanicSpeciality {
 }
 
 model Mechanic {
-  id                  String             @id @default(cuid())
-  name                String
-  phoneNumber         String             @unique
-  email               String?            @unique
-  experienceYears     Int
-  status              MechanicStatus     @default(ACTIVE)
-  speciality          MechanicSpeciality
-  appointmentId       String?
-  appointmentAssigned Appointment?       @relation(fields: [appointmentId], references: [id])
+  id                 String               @id @default(cuid())
+  name               String
+  phoneNumber        String               @unique
+  email              String?              @unique
+  experienceYears    Int
+  status             MechanicStatus       @default(ACTIVE)
+  speciality         MechanicSpeciality
+  serviceCenterId    String
+  isAssigned         Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  MechanicAssignment MechanicAssignment[]
+  serviceCenter      ServiceCenter        @relation(fields: [serviceCenterId], references: [id])
 
-  serviceCenterId String
-  serviceCenter   ServiceCenter @relation(fields: [serviceCenterId], references: [id])
-
-  assignedAt   DateTime?
-  unassignedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([serviceCenterId, status])
-  @@index([appointmentId])
+  @@index([serviceCenterId])
 }
 
 model Inventory {
-  id        String    @id @default(uuid())
+  id        String    @id @default(cuid())
   name      String
   sku       String    @unique
   brand     String?
@@ -273,7 +273,8 @@ enum SCNotificationType {
   PAYMENT_COMPLETED
   LOW_STOCK
   STOCK_EXHAUSTED
-  APPOINTMENT_APPROVAL_SLA_BREACHED
+  SLA_BREACHED
+  USER_FEEDBACK
 }
 
 model ServiceCenterNotification {
@@ -323,4 +324,66 @@ model Payment {
 
   @@index([invoiceId])
   @@index([appointmentId])
+}
+
+model Resolution {
+  id            String      @id @default(cuid())
+  appointmentId String      @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  note          String
+  attachments   String[]
+  resolvedAt    DateTime    @default(now())
+}
+
+model Feedback {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  rating        Int // 1–5
+  comment       String?
+  attachments   String[]
+  isVerified    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model AppointmentLog {
+  id            String        @id @default(cuid())
+  appointmentId String
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  type          bookingStatus
+  from          DateTime?
+  to            DateTime?
+  remark        String?
+  createdAt     DateTime      @default(now())
+
+  @@index([appointmentId])
+}
+
+model MechanicAssignment {
+  id            String @id @default(cuid())
+  appointmentId String
+  mechanicId    String
+
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+
+  mechanic    Mechanic    @relation(fields: [mechanicId], references: [id], onDelete: Cascade)
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([mechanicId])
+  @@index([appointmentId])
+}
+
+enum AdminNotificationType {
+  SLA_BREACHED
+  USER_FEEDBACK
+}
+
+model AdminNotification {
+  id        String                @id @default(cuid())
+  type      AdminNotificationType
+  message   String
+  isRead    Boolean               @default(false)
+  createdAt DateTime              @default(now())
 }

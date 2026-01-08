@@ -20,10 +20,14 @@ export async function GET(request: NextRequest) {
         isAccidental: true,
         photos: true,
         slaDeadline: true,
-        Mechanic: {
+        MechanicAssignment: {
           select: {
-            id: true,
-            name: true,
+            mechanicId: true,
+            mechanic: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
         Vehicle: {
@@ -42,6 +46,14 @@ export async function GET(request: NextRequest) {
         Invoice: {
           select: {
             billingDate: true,
+          },
+        },
+        Feedback: {
+          select: {
+            id: true,
+            createdAt: true,
+            rating: true,
+            comment: true,
           },
         },
         JobCards: {

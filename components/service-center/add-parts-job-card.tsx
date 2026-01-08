@@ -52,7 +52,7 @@ export default function AddPartsToJobCard({ appointmentId, jobCardId, serviceCen
 
            
 
-                toast.success(response.data.message)
+                toast.success(response.data)
                 form.reset()
             } catch (error) {
                 console.log(error);

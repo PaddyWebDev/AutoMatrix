@@ -28,6 +28,7 @@ import Image from "next/image";
 import { NoAppointmentData } from "@/components/service-center/no-appointment-data";
 import socket from "@/lib/socket-io";
 import { decryptSocketData } from "@/hooks/cryptr";
+import CompleteService from "@/components/service-center/complete-service";
 
 
 export default function AppointmentDetailPage() {
@@ -60,6 +61,7 @@ export default function AppointmentDetailPage() {
     )
   }
 
+  console.log(appointment);
   return (
     <RenderAppointmentData appointment={appointment} router={router} id={id as string} session={session} />
   )
@@ -85,13 +87,15 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
         if (!prevData) return prevData
         return {
           ...prevData,
-          Mechanic: [
-            ...(prevData.Mechanic ?? []).filter(
+          MechanicAssignment: [
+            ...(prevData.MechanicAssignment ?? []).filter(
               (m) => m.mechanicId !== data.id
             ),
             {
               mechanicId: data.id,
-              name: data.name,
+              mechanic: {
+                name :  data.name,
+              }
             },
           ],
         }
@@ -281,11 +285,8 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
             )}
             {appointment.status === 'InService' && (
               <div className="flex items-center gap-4">
-                <Button disabled={isPending} onClick={() => updateAppointmentStatus('COMPLETED')}>
-                  {isPending ? "Updating..." : "Complete Service"}
-                </Button>
-
-                <AssignMechanic skipMechanicIds={appointment.Mechanic} appointmentId={id} alreadyAssigned={!!appointment.Mechanic[0]?.name} />
+                <CompleteService appointmentId={id} updatedStatus="COMPLETED" />
+                <AssignMechanic skipMechanicIds={appointment.MechanicAssignment} appointmentId={id} alreadyAssigned={!!appointment.MechanicAssignment[0]?.mechanic.name} />
               </div>
             )}
             {
@@ -306,9 +307,9 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
           <div className="mt-5">
             <h1 className="text-xl font-bold">Mechanics Assigned </h1>
             {
-              appointment.Mechanic.map((mechanicAssign, index: number) => (
+              appointment.MechanicAssignment.map((mechanicAssign, index: number) => (
                 <h1 key={index}>
-                  {mechanicAssign.name}
+                  {mechanicAssign.mechanic.name}
                 </h1>
               ))
             }
@@ -390,6 +391,55 @@ function RenderAppointmentData({ appointment, router, id, session }: RenderAppoi
           </div>
         </CardContent>
       </Card>
+
+      {/* Feedback */}
+      {appointment.status === 'COMPLETED' && appointment.Feedback && (
+        <Card className="dark:bg-neutral-800 bg-neutral-100">
+          <CardHeader>
+            <CardTitle>Customer Feedback</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base font-medium">Rating</Label>
+                <div className="flex items-center space-x-2 mt-1">
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span
+                        key={star}
+                        className={`text-lg ${
+                          star <= appointment.Feedback!.rating
+                            ? 'text-yellow-400'
+                            : 'text-gray-300'
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">
+                    ({appointment.Feedback!.rating} star{appointment.Feedback!.rating > 1 ? 's' : ''})
+                  </span>
+                </div>
+              </div>
+
+              {appointment.Feedback!.comment && (
+                <div>
+                  <Label className="text-base font-medium">Comments</Label>
+                  <p className="mt-1 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+                    {appointment.Feedback!.comment}
+                  </p>
+                </div>
+              )}
+
+              <div className="text-sm text-gray-500">
+                Submitted on {new Date(appointment.Feedback!.createdAt).toLocaleDateString()} at{' '}
+                {new Date(appointment.Feedback!.createdAt).toLocaleTimeString()}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
