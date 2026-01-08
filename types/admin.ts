@@ -1,4 +1,4 @@
-import { JobCardParts } from "@prisma/client";
+import { bookingStatus, JobCardParts } from "@prisma/client";
 
 export type ServiceCenterReport = {
   serviceCenterId: string;
@@ -23,8 +23,8 @@ export type TriageAppointment = {
   id: string;
   vehicleName: string;
   serviceType: string;
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'InService' | 'COMPLETED';
+  priority: "LOW" | "MEDIUM" | "HIGH";
+  status: bookingStatus;
   requestedDate: string;
   slaDeadline: string | null;
   slaBreached: boolean;
@@ -44,13 +44,12 @@ export type Assignment = {
 
 export type EscalationRule = {
   id: string;
-  condition: 'TIME_BASED' | 'SEVERITY_BASED';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  condition: "TIME_BASED" | "SEVERITY_BASED";
+  priority: "LOW" | "MEDIUM" | "HIGH";
   thresholdHours: number | null;
   autoEscalate: boolean;
   notifyAdmin: boolean;
 };
-
 
 export interface AppointmentAdmin {
   id: string;
@@ -105,7 +104,7 @@ export interface AppointmentAdmin {
   } | null;
 }
 
-export type AppointmentsResponseAdmin ={
+export type AppointmentsResponseAdmin = {
   appointment_data: AppointmentAdmin[];
   pagination: {
     page: number;
@@ -113,7 +112,7 @@ export type AppointmentsResponseAdmin ={
     total: number;
     totalPages: number;
   };
-}
+};
 
 export interface FeedbackWithDetails {
   id: string;
